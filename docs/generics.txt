@@ -1,0 +1,19 @@
+DEL:
+    used to delete one or more keys from db
+    syntax: DEL [<keyname>]+
+
+EXIT:
+    used to exit the db interface
+    syntax: EXIT
+
+TYPE:
+    used to determine the type of value the key(s) holds
+    syntax: TYPE [<keyname>]+
+
+EXPIRE:
+    used to add TTL to key(s)
+    syntax: EXPIRE [<keyname> <time in seconds>]+
+
+PERSIST:
+    used to clear TTL from key(s)
+    syntax: PERSIST [<keyname>]+

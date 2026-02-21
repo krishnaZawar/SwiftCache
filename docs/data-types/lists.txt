@@ -1,0 +1,46 @@
+List functions:
+    LPUSH
+    RPUSH
+    LPUSHIDX
+    LPOP
+    RPOP
+    LPOPIDX
+    LLEN
+    LINDEX
+    LRANGE
+
+LPUSH:
+    used to push multiple values in sequence from the left side of the list
+    syntax: LPUSH <keyname> [<value>]+
+
+RPUSH:
+    used to push multiple values in sequence from the right side of the list
+    syntax: RPUSH <keyname> [<value>]+
+
+LPUSHIDX:
+    used to push a single value at a given position from the left of the list
+    syntax: LPUSHIDX <keyname> <value> <index>
+
+LPOP:
+    used to pop and return the first value from left of the list
+    syntax: LPOP <keyname> <count>
+
+RPOP:
+    used to pop and return the first value from right of the list
+    syntax: RPOP <keyname> <count>
+
+LPOPIDX:
+    used to pop and return the value at a given position from the left of the list
+    syntax: LPOPIDX <keyname> <index>
+
+LLEN:
+    used to return the length of the list
+    syntax: LLEN <keyname>
+
+LINDEX:
+    used to return the value at a given index in list
+    syntax: LINDEX <keyname> [<index>]+
+
+LRANGE:
+    used to return all the values in a given range in the list
+    syntax: LRANGE <keyname> <start index> <end index>

@@ -1,0 +1,12 @@
+record structure:
+    key-value pairs
+
+key structure:
+    key should be a string
+    key should strictly not contain spaces
+
+value structure:
+    value can hold multiple types like:
+        strings
+        lists
+        hashes

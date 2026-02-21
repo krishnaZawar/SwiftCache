@@ -1,0 +1,41 @@
+Hash functions:
+    HSET
+    HGET
+    HGETALL
+    HKEYS
+    HDEL
+    HEXISTS
+    HLEN
+    HSTRLEN
+
+HSET:
+    used to set a value to a field in the hash, can be used for multiple pairs also
+    syntax: HSET <keyname> [<fieldname> <value>]+
+
+HGET:
+    used to fetch the values from one or more fields in the key
+    syntax: HGET <keyname> [<fieldname>]+
+
+HGETALL:
+    returns all the field-value pairs in the key
+    syntax: HGETALL <keyname>
+
+HKEYS:
+    returns all the keys in the hash
+    syntax: HKEYS <keyname>
+
+HDEL:
+    deletes one or more fields in the key
+    syntax: HDEL <keyname> [<fieldname>]+
+
+HEXISTS:
+    checks if one or more fields exist in the key
+    syntax: HEXISTS <keyname> [<fieldname>]+
+
+HLEN:
+    returns the length of the hash
+    syntax: HLEN <keyname>
+
+HSTRLEN:
+    returns the length of the value in one or more fields
+    syntax: HSTRLEN <keyname> [<fieldname>]+

@@ -1,0 +1,76 @@
+#include<string>
+#include<deque>
+
+#ifndef ListDatatype_class
+#define ListDatatype_class
+
+using std::string;
+using std::deque;
+
+class ListDatatype{
+    private:
+        deque<string> list;
+
+    public:
+        void assertIdxBounds(int idx){
+            if(idx < 0 || idx >= list.size()){
+                throw string("Error: Index out of bounds");
+            }
+        }
+        ListDatatype(){
+            list = deque<string> ();
+        }
+
+        void pushLeft(string value){
+            list.push_front(value);
+        }
+        void pushRight(string value){
+            list.push_back(value);
+        }
+        void pushAtIdx(int idx, string value){
+            assertIdxBounds(idx);
+            if(idx == 0){
+                pushLeft(value);
+            }
+            else if(idx == list.size()-1){
+                pushRight(value);
+            }
+            else{
+                list.insert(list.begin()+idx, value);
+            }
+        }
+
+        string popLeft(){
+            string val = list.front();
+            list.pop_front();
+            return val;
+        }
+        string popRight(){
+            string val = list.back();
+            list.pop_back();
+            return val;
+        }
+        string popAtIdx(int idx){
+            assertIdxBounds(idx);
+            if(idx == 0){
+                return popLeft();
+            }
+            if(idx == list.size()){
+                return popRight();
+            }
+            string val = list[idx];
+            list.erase(list.begin()+idx);
+            return val;
+        }
+
+        int len(){
+            return list.size();
+        }
+
+        string getIdx(int idx){
+            assertIdxBounds(idx);
+            return list[idx];
+        }
+};
+
+#endif // ListDatatype_class

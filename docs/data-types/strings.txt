@@ -1,0 +1,11 @@
+String functions:
+    SET
+    SGET
+
+SET:
+    used to add/update key(s) with a string value
+    syntax: SET [<keyname> <value>]+
+
+GET:
+    used to fetch the value stored with key(s)
+    syntax: GET [<keyname>]+
