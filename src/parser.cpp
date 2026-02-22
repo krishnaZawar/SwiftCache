@@ -37,7 +37,9 @@ class Parser{
                         cur += ch;
                     }
                 } else if(ch == ' '){
-                    tokens.push_back(cur);
+                    if(cur != ""){
+                        tokens.push_back(cur);
+                    }
                     cur = "";
                 } else if(ch == '\"'){
                     quote_open = true;
@@ -91,20 +93,26 @@ class Parser{
             if(tokens.size() == 0){
                 return "";
             }
-            if(existsIn(string_commands, tokens[0])) {
-                return stringDriver.execDriver(tokens);
-            }
-            else if(existsIn(generic_commands, tokens[0])){
-                return genericsDriver.execDriver(tokens);
-            }
-            else if(existsIn(list_commands, tokens[0])){
-                return listDriver.execDriver(tokens);
-            }
-            else if(existsIn(hash_commands, tokens[0])){
-                return hashDriver.execDriver(tokens);
-            }
-            else {
-                throw string("Error: Invalid Command");
+            switch(tokens[0][0]){
+                case 'S':
+                case 'G':
+                    return stringDriver.execDriver(tokens);
+                    break;
+                case 'L':
+                case 'R':
+                    return listDriver.execDriver(tokens);
+                    break;
+                case 'H':
+                    return hashDriver.execDriver(tokens);
+                    break;
+                case 'D':
+                case 'T':
+                case 'E':
+                case 'P':
+                    return genericsDriver.execDriver(tokens);
+                    break;
+                default:
+                    throw string("Error: Invalid Command");
             }
             return "";
         }

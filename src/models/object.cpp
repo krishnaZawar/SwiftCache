@@ -1,6 +1,5 @@
 #include<string>
 #include<ctime>
-#include "key.cpp"
 #include "value.cpp"
 
 #ifndef Object_class
@@ -12,45 +11,44 @@ using std::time;
 
 class Object{
     private:
-        Key* key;
+        string key;
         Value* value;
         time_t expiresAt;
     public:
         Object() {}
-        Object(Key* _key, Value* val){
+        Object(string _key, Value* val){
             key = _key;
             value = val;
             expiresAt = 0;
         }
 
-        void setTTL(int seconds){
+        inline void setTTL(int seconds){
             expiresAt = time(NULL) + seconds;
         }
-        void clearTTL(){
+        inline void clearTTL(){
             expiresAt = 0;
         }
-        bool expired(){
+        inline bool expired(){
             return expiresAt != 0 && expiresAt <= time(NULL);
         }
         
-        string getKey(){
-            return key->get();
+        inline string getKey(){
+            return key;
         }
         
-        char getType(){
+        inline char getType(){
             return value->getType();
         }
 
-        void* getValue(){
+        inline void* getValue(){
             return value->getValue();
         }
 
-        void updateValue(void* val){
+        inline void updateValue(void* val){
             value->updateValue(val);
         }
 
         ~Object(){
-            delete key;
             delete value;
         }
 };

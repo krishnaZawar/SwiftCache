@@ -15,34 +15,60 @@ class GenericsDriver{
         Database *db;
 
         string Type(vector<string> &tokens){
-            string res = "Type of the key(s): \n";
+            string res = "";
             for(int i = 1; i < tokens.size(); i++){
-                res += db->getType(tokens[i]) +"\n";
+                try{
+                    res += db->getType(tokens[i]) +" ";
+                } catch(string &err){
+                    res += "nil ";
+                }
             }
+            res.pop_back();
             return res;
         }
         
         string Del(vector<string> &tokens){
+            string res = "";
             for(int i = 1; i < tokens.size(); i++){
-                db->deleteKey(tokens[i]);
+                try{
+                    db->deleteKey(tokens[i]);
+                    res += "1";
+                }
+                catch(string &err){
+                    res += "0";
+                }
             }
-            return "Success: key(s) deleted successfully";;
+            return res;
         }
         
         string Expire(vector<string> &tokens){
+            string res = "";
             for(int i = 1; i < tokens.size(); i+=2){
-                db->assertKeyExists(tokens[i]);
-                db->getObject(tokens[i])->setTTL(stoi(tokens[i+1]));
+                try{
+                    db->assertKeyExists(tokens[i]);
+                    db->getObject(tokens[i])->setTTL(stoi(tokens[i+1]));
+                    res += "1";
+                }
+                catch(string &err){
+                    res += "0";
+                }
             }
-            return "Success: Expiry set to the key(s)";
+            return res;
         }
         
         string Persist(vector<string> &tokens){
+            string res = "";
             for(int i = 1; i < tokens.size(); i++){
-                db->assertKeyExists(tokens[i]);
-                db->getObject(tokens[i])->clearTTL();
+                try{
+                    db->assertKeyExists(tokens[i]);
+                    db->getObject(tokens[i])->clearTTL();
+                    res += "1";
+                }
+                catch(string &err){
+                    res += "0";
+                }
             }
-            return "Success: TTL cleared for the key(s)";
+            return res;
         }
 
     public:
@@ -71,11 +97,14 @@ class GenericsDriver{
                 }
                 return Expire(tokens);
             }
-            if(tokens[0] == "PERSIST"){
+            else if(tokens[0] == "PERSIST"){
                 if(tokens.size() < 2){
                     throw string("Error: Invalid usage of PERSIST command");
                 }
                 return Persist(tokens);
+            }
+            else{
+                throw string("Error: Invalid Command");
             }
             return "";
         }

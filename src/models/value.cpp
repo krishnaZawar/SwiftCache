@@ -15,20 +15,20 @@ class Value{
         
         void* value;
 
-        void isValidType(char _type){
+        inline void isValidType(char _type){
             if(_type != 's' && _type != 'l' && _type != 'h'){
                 throw std::string("Error: Invalid type setting");
             }
         }
 
-        void deleteValue(){
+        inline void deleteValue(){
             if(type == 's'){
-                delete (StringDatatype*)value;
+                delete (string*)value;
             }
-            if(type == 'l'){
+            else if(type == 'l'){
                 delete (ListDatatype*)value;
             }
-            if(type == 'h'){
+            else if(type == 'h'){
                 delete (HashDatatype*)value;
             }
         }
@@ -47,16 +47,16 @@ class Value{
             value = val;
         }
 
-        char getType(){
+        inline char getType(){
             return type;
         }
 
-        void updateValue(void* val){
+        inline void updateValue(void* val){
             deleteValue();
             value = val;
         }
 
-        void* getValue(){
+        inline void* getValue(){
             return value;
         }
         

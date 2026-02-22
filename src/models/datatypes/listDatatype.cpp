@@ -12,19 +12,20 @@ class ListDatatype{
         deque<string> list;
 
     public:
-        void assertIdxBounds(int idx){
+        ListDatatype(){
+            list = deque<string> ();
+        }
+        
+        inline void assertIdxBounds(int idx){
             if(idx < 0 || idx >= list.size()){
                 throw string("Error: Index out of bounds");
             }
         }
-        ListDatatype(){
-            list = deque<string> ();
-        }
 
-        void pushLeft(string value){
+        inline void pushLeft(string value){
             list.push_front(value);
         }
-        void pushRight(string value){
+        inline void pushRight(string value){
             list.push_back(value);
         }
         void pushAtIdx(int idx, string value){
@@ -40,12 +41,12 @@ class ListDatatype{
             }
         }
 
-        string popLeft(){
+        inline string popLeft(){
             string val = list.front();
             list.pop_front();
             return val;
         }
-        string popRight(){
+        inline string popRight(){
             string val = list.back();
             list.pop_back();
             return val;
@@ -63,11 +64,11 @@ class ListDatatype{
             return val;
         }
 
-        int len(){
+        inline int len(){
             return list.size();
         }
 
-        string getIdx(int idx){
+        inline string getIdx(int idx){
             assertIdxBounds(idx);
             return list[idx];
         }

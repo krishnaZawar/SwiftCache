@@ -16,7 +16,7 @@ class ListDriver{
         char datatype = 'l';
         Database *db;
 
-        void assert(Object* obj){
+        inline void assert(Object* obj){
             if(obj->getType() != datatype){
                 throw string("Error: key type mismatch");
             }
@@ -28,34 +28,32 @@ class ListDriver{
                 assert(obj);
             }
             else{
-                obj = new Object(new Key(key), new Value(datatype, new ListDatatype()));
+                obj = new Object(key, new Value(datatype, new ListDatatype()));
                 db->insertObject(obj);
             }
             return (ListDatatype*)obj->getValue();
         }
 
-        string LPush(vector<string> &tokens){
+        inline string LPush(vector<string> &tokens){
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
                 value->pushLeft(tokens[i]);
             }
-
-            return "Success: Values added to the list successfully";
+            return "1";
         }
-        string RPush(vector<string> &tokens){
+        inline string RPush(vector<string> &tokens){
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
                 value->pushRight(tokens[i]);
             }
-
-            return "Success: Values added to the list successfully";
+            return "1";
         }
-        string LPushIdx(vector<string> &tokens){
+        inline string LPushIdx(vector<string> &tokens){
             ListDatatype* value = getValue(tokens[1]);
             value->pushAtIdx(stoi(tokens[3]), tokens[2]);
-            return "Success: Value pushed at the given index successfully";
+            return "1";
         }
 
         string LPop(vector<string> &tokens){
@@ -68,7 +66,7 @@ class ListDriver{
             for(int i = 1; i <= count; i++){
                 value->popLeft();
             }
-            return "Success: value popped from the list successfully";
+            return "1";
         }
         string RPop(vector<string> &tokens){
             db->assertKeyExists(tokens[1]);
@@ -80,32 +78,27 @@ class ListDriver{
             for(int i = 1; i <= count; i++){
                 value->popRight();
             }
-            return "Success: value popped from the list successfully";
+            return "1";
         }
-        string LPopIdx(vector<string> &tokens){
+        inline string LPopIdx(vector<string> &tokens){
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             value->popAtIdx(stoi(tokens[2]));
-            return "Success: value popped from the list successfully";
+            return "1";
         }
 
-        string LLen(vector<string> &tokens){
+        inline string LLen(vector<string> &tokens){
             db->assertKeyExists(tokens[1]);
-            return "Success: Length of the list is " + to_string(getValue(tokens[1])->len());
+            return to_string(getValue(tokens[1])->len());
         }
         string LIndex(vector<string> &tokens){
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             string values = "";
             for(int i = 2; i < tokens.size(); i++){
-                try{
-                    values += value->getIdx(stoi(tokens[i])) + "\n";
-                }
-                catch(string &err){
-                    throw err + "Values at the given first "+to_string(i-2)+" index(s) are:\n" + values;
-                }
+                values += value->getIdx(stoi(tokens[i])) + "\n";
             }
-            return "Success: Value(s) are: \n" + values;
+            return values;
         }
         string LRange(vector<string> &tokens){
             db->assertKeyExists(tokens[1]);
@@ -114,7 +107,7 @@ class ListDriver{
             int end = stoi(tokens[3]);
             value->assertIdxBounds(start);
             value->assertIdxBounds(end);
-            string returnVal = "Success: The values are\n";
+            string returnVal = "";
             while(start <= end){
                 returnVal += value->getIdx(start)+"\n";
                 start++;
@@ -136,53 +129,56 @@ class ListDriver{
                 }
                 return LPush(tokens);
             }
-            if(tokens[0] == "RPUSH"){
+            else if(tokens[0] == "RPUSH"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of RPUSH command");
                 }
                 return RPush(tokens);
             }
-            if(tokens[0] == "LPUSHIDX"){
+            else if(tokens[0] == "LPUSHIDX"){
                 if(tokens.size() != 4){
                     throw string("Error: Invalid usage of LPUSHIDX command");
                 }
                 return LPushIdx(tokens);
             }
-            if(tokens[0] == "LPOP"){
+            else if(tokens[0] == "LPOP"){
                 if(tokens.size() != 3){
                     throw string("Error: Invalid usage of LPOP command");
                 }
                 return LPop(tokens);
             }
-            if(tokens[0] == "RPOP"){
+            else if(tokens[0] == "RPOP"){
                 if(tokens.size() != 3){
                     throw string("Error: Invalid usage of RPOP command");
                 }
                 return RPop(tokens);
             }
-            if(tokens[0] == "LPOPIDX"){
+            else if(tokens[0] == "LPOPIDX"){
                 if(tokens.size() != 3){
                     throw string("Error: Invalid usage of LPOPIDX command");
                 }
                 return LPopIdx(tokens);
             }
-            if(tokens[0] == "LLEN"){
+            else if(tokens[0] == "LLEN"){
                 if(tokens.size() != 2){
                     throw string("Error: Invalid usage of LLEN command");
                 }
                 return LLen(tokens);
             }
-            if(tokens[0] == "LINDEX"){
+            else if(tokens[0] == "LINDEX"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of LINDEX command");
                 }
                 return LIndex(tokens);
             }
-            if(tokens[0] == "LRANGE"){
+            else if(tokens[0] == "LRANGE"){
                 if(tokens.size() != 4){
                     throw string("Error: Invalid usage of LRANGE command");
                 }
                 return LRange(tokens);
+            }
+            else{
+                throw string("Error: Invalid Command");
             }
             return "";
         }

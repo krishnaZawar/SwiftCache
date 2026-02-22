@@ -13,7 +13,7 @@ class HashDatatype{
     private:
         unordered_map<string, string> hash;
 
-        void assertFieldExists(string field){
+        inline void assertFieldExists(string field){
             if(!fieldExists(field)){
                 throw string("Error: field does not exist");
             }
@@ -21,20 +21,20 @@ class HashDatatype{
     public:
         HashDatatype(){}
         
-        bool fieldExists(string field){
+        inline bool fieldExists(string field){
             return hash.find(field) != hash.end();
         }
 
-        void setField(string field, string value){
+        inline void setField(string field, string value){
             hash[field] = value;
         }
         
-        string getField(string field){
+        inline string getField(string field){
             assertFieldExists(field);
             return hash[field];
         }
         
-        vector<string> getKeys(){
+        inline vector<string> getKeys(){
             vector<string> keys;
             for(auto &[key, _]: hash){
                 keys.push_back(key);
@@ -42,7 +42,7 @@ class HashDatatype{
             return keys;
         }
 
-        vector<string> getKeyVals(){
+        inline vector<string> getKeyVals(){
             vector<string> keyVals;
             for(auto &[key, val]: hash){
                 keyVals.push_back(key);
@@ -51,16 +51,16 @@ class HashDatatype{
             return keyVals;
         }
         
-        void delField(string field){
+        inline void delField(string field){
             assertFieldExists(field);
             hash.erase(field);
         }
 
-        int len(){
+        inline int len(){
             return hash.size();
         }
 
-        int strLen(string field){
+        inline int strLen(string field){
             assertFieldExists(field);
             return hash[field].size();
         }

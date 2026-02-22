@@ -11,6 +11,7 @@
 using std::string;
 using std::cout;
 using std::endl;
+using std::swap;
 
 class Database{
     private:
@@ -34,7 +35,7 @@ class Database{
         int rehashDbSize;
         bool underRehash;
         
-        int getHash(string key, int tableSize){
+        inline int getHash(string key, int tableSize){
             int hash_val = 0;
             long long exp = 1;
             int prime = 31;
@@ -80,16 +81,20 @@ class Database{
             int curBatchSize = 0;
             int rehashIdx = primaryDbIdxForRehash;
             while(rehashIdx < primaryDbSize && curBatchSize < rehashBatchSize){
-                for(int i = primaryDb[rehashIdx].size()-1; i >= 0; i--){
-                    if(!primaryDb[rehashIdx][i]->expired()){
-                        newHash = getHash(primaryDb[rehashIdx][i]->getKey(), rehashDbSize);
-                        rehashDb[newHash].push_back(primaryDb[rehashIdx][i]);
+                if(primaryDb[rehashIdx].size() > 0){
+                    newHash = getHash(primaryDb[rehashIdx][0]->getKey(), rehashDbSize);
+                    for(int i = (int)primaryDb[rehashIdx].size()-1; i >= 0; i--){
+                        if(primaryDb[rehashIdx][i]){
+                            if(!primaryDb[rehashIdx][i]->expired()){
+                                rehashDb[newHash].push_back(primaryDb[rehashIdx][i]);
+                            }
+                            else{
+                                delete primaryDb[rehashIdx][i];
+                                keysPresent--;
+                            }
+                        }
                     }
-                    else{
-                        delete primaryDb[rehashDbSize][i];
-                        keysPresent--;
-                    }
-                    primaryDb[rehashIdx].pop_back();
+                    primaryDb[rehashIdx] = vector<Object*> ();
                 }
                 curBatchSize++;
                 rehashIdx=primaryDbIdxForRehash + curBatchSize;
@@ -100,6 +105,7 @@ class Database{
     public:
         void runExpiryLoop(){
             if(underRehash){
+                primaryDbIdxForExpiry = 0;
                 return;
             }
             if(primaryDbIdxForExpiry >= primaryDbSize){
@@ -108,10 +114,15 @@ class Database{
             int curBatchSize = 0;
             int expireIdx = primaryDbIdxForExpiry;
             while(expireIdx < primaryDbSize && curBatchSize < expiryBatchSize){
-                for(int i = primaryDb[expireIdx].size()-1; i >= 0; i--){
-                    if(primaryDb[expireIdx][i]->expired()){
+                for(int i = (int)primaryDb[expireIdx].size()-1; i >= 0; i--){
+                    if(!primaryDb[expireIdx][i]){
+                        primaryDb[expireIdx][i] = primaryDb[expireIdx].back();
+                        primaryDb[expireIdx].pop_back();
+                    }
+                    else if(primaryDb[expireIdx][i]->expired()){
                         delete primaryDb[expireIdx][i];
-                        primaryDb[expireIdx].erase(primaryDb[expireIdx].begin() + i);
+                        primaryDb[expireIdx][i] = primaryDb[expireIdx].back();
+                        primaryDb[expireIdx].pop_back();
 
                         keysPresent--;
                     }
@@ -126,12 +137,17 @@ class Database{
     private:
         bool keyExistsHelper(string key, vector<vector<Object*>> &db, int dbSize){
             int hash = getHash(key, dbSize);
-            for(int i = db[hash].size()-1; i >= 0; i--){
-                if(db[hash][i]->getKey() == key){
+            for(int i = (int)db[hash].size()-1; i >= 0; i--){
+                if(!db[hash][i]){
+                    primaryDb[hash][i] = primaryDb[hash].back();
+                    primaryDb[hash].pop_back();
+                }
+                else if(db[hash][i]->getKey() == key){
                     if(db[hash][i]->expired()){
                         delete db[hash][i];
-                        db[hash].erase(db[hash].begin()+i);
-
+                        primaryDb[hash][i] = primaryDb[hash].back();
+                        primaryDb[hash].pop_back();
+                        
                         keysPresent--;
                         return false;
                     }
@@ -144,15 +160,20 @@ class Database{
         bool deleteKeyHelper(string key, vector<vector<Object*>> &db, int dbSize){
             int hash = getHash(key, dbSize);
             for(int i = 0; i < db[hash].size(); i++){
-                if(db[hash][i]->getKey() == key){
+                if(!db[hash][i]){
+                    primaryDb[hash][i] = primaryDb[hash].back();
+                    primaryDb[hash].pop_back();
+                }
+                else if(db[hash][i]->getKey() == key){
                     delete db[hash][i];
-                    db[hash].erase(db[hash].begin() + i);
+                    primaryDb[hash][i] = primaryDb[hash].back();
+                    primaryDb[hash].pop_back();
                     return true;
                 }
             }
             return false;
         }
-
+        
         char getTypeHelper(string key, vector<vector<Object*>> &db, int dbSize){
             int hash = getHash(key, dbSize);
             for(auto &obj: db[hash]){
@@ -162,14 +183,19 @@ class Database{
             }
             return ' ';
         }
-
+        
         Object* getObjectHelper(string key, vector<vector<Object*>> &db, int dbSize){
             int hash = getHash(key, dbSize);
-            for(int i = db[hash].size()-1; i >= 0; i--){
-                if(db[hash][i]->getKey() == key){
+            for(int i = (int)db[hash].size()-1; i >= 0; i--){
+                if(!db[hash][i]){
+                    primaryDb[hash][i] = primaryDb[hash].back();
+                    primaryDb[hash].pop_back();
+                }
+                else if(db[hash][i]->getKey() == key){
                     if(db[hash][i]->expired()){
                         delete db[hash][i];
-                        db[hash].erase(db[hash].begin()+i);
+                        primaryDb[hash][i] = primaryDb[hash].back();
+                        primaryDb[hash].pop_back();
 
                         keysPresent--;
                         return NULL;
@@ -180,7 +206,7 @@ class Database{
             return NULL;
         }
 
-        void insertObjectHelper(Object* obj, vector<vector<Object*>> &db, int dbSize){
+        inline void insertObjectHelper(Object* obj, vector<vector<Object*>> &db, int dbSize){
             int hash = getHash(obj->getKey(), dbSize);
             db[hash].push_back(obj);
         }
@@ -194,14 +220,14 @@ class Database{
             primaryDb = vector<vector<Object*>> (primaryDbSize);
         }
 
-        bool keyExists(string key){
+        inline bool keyExists(string key){
             bool exists = keyExistsHelper(key, primaryDb, primaryDbSize);
             if(!exists && underRehash){
                 exists = keyExistsHelper(key, rehashDb, rehashDbSize);
             }
             return exists;
         }
-        void assertKeyExists(string key){
+        inline void assertKeyExists(string key){
             if(!keyExists(key)){
                 throw string("Error: Key not found");
             }
@@ -241,6 +267,9 @@ class Database{
                 case 'l':
                     type = "List";
                     break;
+                case 'h':
+                    type = "Hash";
+                    break;
             }
             return type;
         }
@@ -272,6 +301,8 @@ class Database{
         }
 
         void printLoadFactor(){
+            cout<<"keys: "<<keysPresent<<endl;
+            cout<<"db size: "<<primaryDbSize<<endl;
             cout<<"Load Factor: "<<getLoadFactor()<<endl;
         }
 };

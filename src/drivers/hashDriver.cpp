@@ -15,7 +15,7 @@ class HashDriver{
         char datatype = 'h';
         Database *db;
 
-        void assert(Object* obj){
+        inline void assert(Object* obj){
             if(obj->getType() != datatype){
                 throw string("Error: key type mismatch");
             }
@@ -26,7 +26,7 @@ class HashDriver{
                 assert(obj);
             }
             else if(insert){
-                obj = new Object(new Key(key), new Value(datatype, new HashDatatype()));
+                obj = new Object(key, new Value(datatype, new HashDatatype()));
                 db->insertObject(obj);
             }
             else{
@@ -35,12 +35,12 @@ class HashDriver{
             return (HashDatatype*)obj->getValue();
         }
 
-        string HSet(vector<string> &tokens){
+        inline string HSet(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1], true);
             for(int i = 2; i < tokens.size(); i+=2){
                 value->setField(tokens[i], tokens[i+1]);
             }
-            return "Success: Field(s) set successfully in the Hash";
+            return "1";
         }
         
         string HGet(vector<string> &tokens){
@@ -51,10 +51,11 @@ class HashDriver{
                     values += value->getField(tokens[i])+'\n';
                 }
                 catch(string &err){
-                    throw err + "\nError fetching "+tokens[i]+"\nValue(s) of first "+to_string(i-2)+" field(s) are:\n"+values;
+                    throw err + "\nError fetching "+tokens[i];
                 }
             }
-            return "Value(s) are:\n"+values;
+            values.pop_back();
+            return values;
         }
         string HGetAll(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
@@ -63,44 +64,48 @@ class HashDriver{
             for(int i = 0; i < keyVals.size(); i+=2){
                 keyValues += keyVals[i] + " : "+keyVals[i+1]+"\n";
             }
-            return "Success: Key-value pairs are:\n"+keyValues;
+            keyValues.pop_back();
+            return keyValues;
         }
         string HKeys(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
             vector<string> keyList = value->getKeys();
             string keys = "";
             for(auto &key: keyList){
-                keys += key + "\n";
+                keys += key + " ";
             }
-            return "Success: The keys in the hash are:\n"+keys;
+            keys.pop_back();
+            return keys;
         }
         
         string HDel(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
+            string res = "";
             for(int i = 2; i < tokens.size(); i++){
                 try{
                     value->delField(tokens[i]);
+                    res += "1";
                 }
                 catch(string &err){
-                    throw err + "\nFirst "+to_string(i-2)+" field(s) are deleted";
+                    res += "0";
                 }
             }
-            return "Success: The field(s) are deleted";
+            return res;
         }
 
         string HExists(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
             string existsStr = "";
             for(int i = 2; i < tokens.size(); i++){
-                existsStr += (value->fieldExists(tokens[i])? "true" : "false");
-                existsStr += "\n";
+                existsStr += (value->fieldExists(tokens[i])? "1" : "0");
+                existsStr += "";
             }
-            return "The Result is:\n"+existsStr;
+            return existsStr;
         }
 
-        string HLen(vector<string> &tokens){
+        inline string HLen(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
-            return "The length of the hash is: "+to_string(value->len());
+            return to_string(value->len());
         }
         string HStrLen(vector<string> &tokens){
             HashDatatype* value = getValue(tokens[1]);
@@ -110,10 +115,11 @@ class HashDriver{
                     lengths += to_string(value->strLen(tokens[i]))+"\n";
                 }
                 catch(string &err){
-                    throw err + "Error fetching field "+tokens[i]+"\nThe lengths of the first "+to_string(i-2)+" Field(s) are:\n"+lengths;
+                    throw err + "Error fetching field "+tokens[i];
                 }
             }
-            return "The length of the field(s) are: \n"+lengths;
+            lengths.pop_back();
+            return lengths;
         }
 
     public:
@@ -130,47 +136,50 @@ class HashDriver{
                 }
                 return HSet(tokens);
             }
-            if(tokens[0] == "HGET"){
+            else if(tokens[0] == "HGET"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of HGET command");
                 }
                 return HGet(tokens);
             }
-            if(tokens[0] == "HGETALL"){
+            else if(tokens[0] == "HGETALL"){
                 if(tokens.size() != 2){
                     throw string("Error: Invalid usage of HGETALL command");
                 }
                 return HGetAll(tokens);
             }
-            if(tokens[0] == "HKEYS"){
+            else if(tokens[0] == "HKEYS"){
                 if(tokens.size() != 2){
                     throw string("Error: Invalid usage of HKEYS command");
                 }
                 return HKeys(tokens);
             }
-            if(tokens[0] == "HDEL"){
+            else if(tokens[0] == "HDEL"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of HDEL command");
                 }
                 return HDel(tokens);
             }
-            if(tokens[0] == "HEXISTS"){
+            else if(tokens[0] == "HEXISTS"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of HEXISTS command");
                 }
                 return HExists(tokens);
             }
-            if(tokens[0] == "HLEN"){
+            else if(tokens[0] == "HLEN"){
                 if(tokens.size() != 2){
                     throw string("Error: Invalid usage of HLEN command");
                 }
                 return HLen(tokens);
             }
-            if(tokens[0] == "HSTRLEN"){
+            else if(tokens[0] == "HSTRLEN"){
                 if(tokens.size() < 3){
                     throw string("Error: Invalid usage of HSTRLEN command");
                 }
                 return HStrLen(tokens);
+            }
+            else{
+                throw string("Error: Invalid Command");
             }
             return "";
         }
