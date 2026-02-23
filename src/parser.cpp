@@ -12,6 +12,9 @@ using std::vector;
 
 class Parser{
     private:
+        /*
+            unused currently, might be required later
+        */
         template<class t>
         bool existsIn(vector<t> &arr, t val){
             for(auto &_val: arr){
@@ -22,29 +25,29 @@ class Parser{
             return false;
         }
         
-        vector<string> tokenize(string command){
+        vector<string> tokenize(const char* command, int size){
             vector<string> tokens;
             string cur = "";
             bool quote_open = false;
-            for(auto &ch : command){
+            for(int i = 0; i < size; i++){
                 if(quote_open){
-                    if(ch == '\"'){
+                    if(command[i] == '\"'){
                         tokens.push_back(cur);
                         cur = "";
                         quote_open = false;
                     }
                     else{
-                        cur += ch;
+                        cur += command[i];
                     }
-                } else if(ch == ' '){
+                } else if(command[i] == ' '){
                     if(cur != ""){
                         tokens.push_back(cur);
                     }
                     cur = "";
-                } else if(ch == '\"'){
+                } else if(command[i] == '\"'){
                     quote_open = true;
                 } else{
-                    cur += ch;
+                    cur += command[i];
                 }
             }
             if(cur != ""){
@@ -69,6 +72,10 @@ class Parser{
 
     public:
         Parser(Database *db) {
+            /*
+                These are not used anywhere.
+                The commands are kept just for reference and will be removed later.
+            */
             string_commands = vector<string> {
                 "SET", "GET"
             };
@@ -88,8 +95,8 @@ class Parser{
             hashDriver = HashDriver(db);
         }
 
-        string parseCommand(string command){
-            vector<string> tokens = tokenize(command);
+        string parseCommand(const char* command, int size){
+            vector<string> tokens = tokenize(command, size);
             if(tokens.size() == 0){
                 return "";
             }

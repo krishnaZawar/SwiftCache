@@ -1,9 +1,10 @@
 #include<iostream>
-#include "parser.cpp"
-#include "database/database.cpp"
+#include<string>
 #include<winsock2.h>
 #include<ws2tcpip.h>
 #include<windows.h>
+#include "parser.cpp"
+#include "database/database.cpp"
 
 // #include<ctime>
 
@@ -79,13 +80,12 @@ int main(int argc, char* argv[]){
     
     cout << "Client connected!" << endl;
     
-    char buffer[4096];
-    string command;
+    char command[4096];
     string resp;
     while(true){
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        int bytesReceived = recv(clientSocket, command, sizeof(command) - 1, 0);
         if (bytesReceived > 0) {
-            buffer[bytesReceived] = '\0'; // Null-terminate
+            command[bytesReceived] = '\0'; // Null-terminate
         }else if (bytesReceived == 0) {
             cout << "Client disconnected" << endl;
             break;
@@ -93,12 +93,11 @@ int main(int argc, char* argv[]){
             cerr << "recv() error: " << WSAGetLastError() << endl;
             break;
         }
-        command = string (buffer, bytesReceived);
-        if(command == "EXIT"){
+        if(!strcmp(command, "EXIT")){
             break;
         }
         try {
-            resp = parser.parseCommand(command);
+            resp = parser.parseCommand(command, bytesReceived);
         }
         catch(string &err){
             cout << err << endl;
@@ -115,47 +114,7 @@ int main(int argc, char* argv[]){
     closesocket(serverSocket);
     WSACleanup();
 
-    db.printLoadFactor();
+    db.printDetails();
 
     return 0;
 }
-
-// using std::time;
-
-// int main(){
-//     string command;
-
-//     Database db = Database();
-//     Parser parser = Parser(&db);
-    
-//     long long start = time(NULL);
-//     for(int i = 0; i < 10000000; i++){
-//         command = "SET k"+to_string(i)+" v"+to_string(i);
-//         try{
-//             parser.parseCommand(command);
-//         }catch(...) {}
-//     }
-//     long long end = time(NULL);
-//     cout << end-start << endl;
-//     while(true){
-//         cout<<">> ";
-//         getline(cin, command);
-//         if(command == "EXIT"){
-//             break;
-//         }
-//         try{  
-//             cout<<parser.parseCommand(command)<<endl;
-//             db.printLoadFactor();
-//         }
-//         catch(string &err){
-//             cout<<err<<endl;
-//         }
-//         catch(exception &e){
-//             cout<<e.what()<<endl;
-//         }
-//     }
-
-//     db.printLoadFactor();
-
-//     return 0;
-// }

@@ -35,6 +35,7 @@ class Database{
         int rehashDbSize;
         bool underRehash;
         
+        // Computes a hash value for a given string key to be used as an index in a hash table of size tableSize.
         inline int getHash(string key, int tableSize){
             int hash_val = 0;
             long long exp = 1;
@@ -69,6 +70,10 @@ class Database{
                 }
             }
         }
+        /*
+            Rehashes the db to stabilize the load factor. This is done via incremental batch rehashing
+            Also performs expiration of keys simultaneously as the expiry loop is blocked during the process.
+        */
         void Rehash(){
             if(primaryDbIdxForRehash == primaryDbSize){
                 underRehash = false;
@@ -103,6 +108,7 @@ class Database{
         }
 
     public:
+        // Clears the expired keys to free memory for new keys. This does incremental batch checks to perform expiration.
         void runExpiryLoop(){
             if(underRehash){
                 primaryDbIdxForExpiry = 0;
@@ -300,7 +306,7 @@ class Database{
             }
         }
 
-        void printLoadFactor(){
+        void printDetails(){
             cout<<"keys: "<<keysPresent<<endl;
             cout<<"db size: "<<primaryDbSize<<endl;
             cout<<"Load Factor: "<<getLoadFactor()<<endl;
