@@ -15,8 +15,8 @@ using std::swap;
 
 class Database{
     private:
-        const int minTableSize = 1 << 2;
-        const int maxTableSize = 1 << 20;
+        const int minTableSize = (1 << 2)+1;
+        const int maxTableSize = (1 << 25)+1;
         const float loadFactorToScaleUp = 1;
         const float loadFactorToScaleDown = 0.25;
         const int rehashBatchSize = 10;
@@ -55,7 +55,7 @@ class Database{
             float loadFactor = getLoadFactor();
             if(loadFactor >= loadFactorToScaleUp){
                 if(primaryDbSize < maxTableSize){
-                    rehashDbSize = primaryDbSize << 1;
+                    rehashDbSize = (primaryDbSize << 1)+1;
                     primaryDbIdxForRehash = 0;
                     underRehash = true;
                     rehashDb = vector<vector<Object*>> (rehashDbSize);
@@ -63,7 +63,7 @@ class Database{
             }
             else if(loadFactor <= loadFactorToScaleDown){
                 if(primaryDbSize > minTableSize){
-                    rehashDbSize = primaryDbSize >> 1;
+                    rehashDbSize = (primaryDbSize >> 1)+1;
                     primaryDbIdxForRehash = 0;
                     underRehash = true;
                     rehashDb = vector<vector<Object*>> (rehashDbSize);
