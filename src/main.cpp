@@ -100,11 +100,9 @@ int main(int argc, char* argv[]){
             resp = parser.parseCommand(command, bytesReceived);
         }
         catch(string &err){
-            cout << err << endl;
             resp = err;
         }
         catch(exception &e){
-            cout << e.what() << endl;
             resp = e.what();
         }
         send(clientSocket, resp.c_str(), resp.size(), 0);
