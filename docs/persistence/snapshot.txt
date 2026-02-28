@@ -1,0 +1,37 @@
+Snapshot:
+    Snapshotting is used to make the data persistent, and to able to reload the data faster
+
+Two scenarios of Snapshotting:
+    Under Rehash:
+        Need to store both the tables, to avoid data loss, and store the complete metadata for proper reference
+    Not under Rehash:
+        Simpler to store compared to the rehash case
+
+    Overall ease of storage and flow:
+        Always store the condition for Rehash, easier to load for next case, similar complexity if not under rehash
+
+Implementation details:
+    The core idea is to split up the writing process between 4 threads that will write 25% data into a temp file. This will speed up the process of freeing the DB from writes by 75%. Then we will run another thread after the completion of all 4 to amalgamate the files sequentially. This amalgamation will be independent of the DB so it is fine if it takes some extra time. During the amalgamation we can also store the metadata at the top of the file.
+
+File structure:
+    generic structure:
+        [metadata]
+        [primary DB]
+        [[bucket index] [bucket size]
+        [key size] [key] [datatype in one char] [value] [ttl]
+        ...]<for all non empty buckets>
+        [rehash DB]
+        [[bucket index] [bucket size]
+        [key size] [key] [datatype in one char] [value] [ttl]
+        ...]<for all non empty buckets>
+
+    value specifics:
+        value to be placed at <value> based on type
+        string:
+            [datatype='s'] [value size] [value]
+        list:
+            [datatype='l'] [list size] [[elem size] [elem]]<list size times>
+        hash:
+            [datatype='h] [hash size] [[field size] [field] [value size] [value]]<hash size times>
+
+This is a proposed Idea, Will be implemented later

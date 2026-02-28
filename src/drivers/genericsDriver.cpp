@@ -43,11 +43,18 @@ class GenericsDriver{
         
         string Expire(vector<string> &tokens){
             string res = "";
+            int expiry;
             for(int i = 1; i < tokens.size(); i+=2){
                 try{
-                    db->assertKeyExists(tokens[i]);
-                    db->getObject(tokens[i])->setTTL(stoi(tokens[i+1]));
-                    res += "1";
+                    expiry = stoi(tokens[i+1]);
+                    if(expiry <= 0){
+                        res += "0";
+                    }
+                    else{
+                        db->assertKeyExists(tokens[i]);
+                        db->getObject(tokens[i])->setTTL(expiry);
+                        res += "1";
+                    }
                 }
                 catch(string &err){
                     res += "0";
