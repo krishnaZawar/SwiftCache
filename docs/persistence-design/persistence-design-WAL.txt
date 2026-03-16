@@ -1,0 +1,36 @@
+WAL:
+    WAL is a preferred design choice for persistence as the Windows OS does not natively support COW(copy on write) on fork() for cheap Snapshotting.
+    This drawback makes us go for the WAL implementation as this is a more feasible implementation, although not the best
+
+One drawback:
+    WAL grows endlessly with updates on the DB.
+    To overcome this we need to do WAL compaction periodically. This is a tricky job with some important trade offs to consider as the DB has 2 states, one when the DB is under rehash and another when it is not under rehash, and both are crucial to handle for data consistency.
+
+Two scenarios:
+    1. Under Rehash
+        Do not complete the rehash state until the WAL compaction is done to avoid data loss
+        Reason:
+            Say the rehash completes before the WAL compaction, data is lost from the rehash DB as the DBs are swapped and the compaction process loses track of the state.
+    2. Not Under Rehash
+        Do not start the rehash until the WAL compaction is done to avoid losing track of data.
+        Reason:
+            The rehash starts in between the WAL compaction, the WAL has incomplete state info right now, and the new state info would make it more trickier to handle.
+    
+    Note:
+        Make sure whenever the WAL compaction is underway, avoid state changes in the DB as this affects data inconsistency.
+
+Implementation:
+    With every update write the command to the WAL. This helps us maintain maximum durability. This can also be done in batches for optimization with trade off for lesser durability
+    Periodically run the WAL compaction algorithm to keep the WAL from growing boundless. This also helps  reduce load times as there are lesser commands to execute.
+    While undergoing WAL compaction remember to also maintain a log buffer to append the new logs at the end of the compacted WAL, while also writing them to the old WAL. After the whole process is complete do an atomic rename of the file and delete the old WAL. The new logs automatically append to the renamed WAL. The rename should be atomic to maintain durability even during compaction failures, where we dont lose the old WAL due to crashes or any unwelcome issues.
+
+    WAL compaction:
+        For every key:
+            Read the data stored in that key and construct a query to replicate that scenario.
+        After the WAL is completed, append the buffer to the compacted WAL and replace with old WAL.
+        We must also remember to keep the WAL compaction incremental so as to still do it efficiently in a single thread while not blocking client requests.
+
+        This method might duplicate commands for keys and the only reason for this is when the command is built from the compactor and it also has some commands in the buffer. This wont affect DB state, but result in redundancy. This trade off can be accepted as the implementation is already tricky in single threaded.
+
+Note:
+    This might not be the best implementation, but it helps us work around the issue of OS level optimizations and reduce the load of implementing OS level abstractions of COW for efficient snapshotting, which is still the best solution.
