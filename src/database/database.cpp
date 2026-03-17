@@ -87,10 +87,10 @@ class Database{
             int rehashIdx = primaryDbIdxForRehash;
             while(rehashIdx < primaryDbSize && curBatchSize < rehashBatchSize){
                 if(primaryDb[rehashIdx].size() > 0){
-                    newHash = getHash(primaryDb[rehashIdx][0]->getKey(), rehashDbSize);
                     for(int i = (int)primaryDb[rehashIdx].size()-1; i >= 0; i--){
                         if(primaryDb[rehashIdx][i]){
                             if(!primaryDb[rehashIdx][i]->expired()){
+                                newHash = getHash(primaryDb[rehashIdx][i]->getKey(), rehashDbSize);
                                 rehashDb[newHash].push_back(primaryDb[rehashIdx][i]);
                             }
                             else{
