@@ -62,6 +62,7 @@ class StringDriver{
                 values += *(string*)(obj->getValue());
                 values += "\n";
             }
+            values.pop_back();
             return values;
         }
 

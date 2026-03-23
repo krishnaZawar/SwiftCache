@@ -98,6 +98,7 @@ class ListDriver{
             for(int i = 2; i < tokens.size(); i++){
                 values += value->getIdx(stoi(tokens[i])) + "\n";
             }
+            values.pop_back();
             return values;
         }
         string LRange(vector<string> &tokens){
@@ -112,6 +113,7 @@ class ListDriver{
                 returnVal += value->getIdx(start)+"\n";
                 start++;
             }
+            returnVal.pop_back();
             return returnVal;
         }
 
