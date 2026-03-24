@@ -15,6 +15,12 @@ class HashDriver{
         char datatype = 'h';
         Database *db;
 
+        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+            if(wrongSyntax){
+                throw string("Error: Invalid usage of " + command + " command");
+            }
+        }
+
         inline void assert(Object* obj){
             if(obj->getType() != datatype){
                 throw string("Error: key type mismatch");
@@ -34,8 +40,11 @@ class HashDriver{
             }
             return (HashDatatype*)obj->getValue();
         }
-
+        
+    public:
         inline string HSet(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 4 || tokens.size() % 2 != 0);
             HashDatatype* value = getValue(tokens[1], true);
             for(int i = 2; i < tokens.size(); i+=2){
                 value->setField(tokens[i], tokens[i+1]);
@@ -44,6 +53,8 @@ class HashDriver{
         }
         
         string HGet(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             HashDatatype* value = getValue(tokens[1]);
             string values = "";
             for(int i = 2; i < tokens.size(); i++){
@@ -58,6 +69,8 @@ class HashDriver{
             return values;
         }
         string HGetAll(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 2);
             HashDatatype* value = getValue(tokens[1]);
             vector<string> keyVals = value->getKeyVals();
             string keyValues = "";
@@ -68,6 +81,8 @@ class HashDriver{
             return keyValues;
         }
         string HKeys(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 2);
             HashDatatype* value = getValue(tokens[1]);
             vector<string> keyList = value->getKeys();
             string keys = "";
@@ -79,6 +94,8 @@ class HashDriver{
         }
         
         string HDel(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             HashDatatype* value = getValue(tokens[1]);
             string res = "";
             for(int i = 2; i < tokens.size(); i++){
@@ -92,8 +109,10 @@ class HashDriver{
             }
             return res;
         }
-
+        
         string HExists(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             HashDatatype* value = getValue(tokens[1]);
             string existsStr = "";
             for(int i = 2; i < tokens.size(); i++){
@@ -102,12 +121,16 @@ class HashDriver{
             }
             return existsStr;
         }
-
+        
         inline string HLen(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 2);
             HashDatatype* value = getValue(tokens[1]);
             return to_string(value->len());
         }
         string HStrLen(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             HashDatatype* value = getValue(tokens[1]);
             string lengths = "";
             for(int i = 2; i < tokens.size(); i++){

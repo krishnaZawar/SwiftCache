@@ -16,6 +16,12 @@ class ListDriver{
         char datatype = 'l';
         Database *db;
 
+        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+            if(wrongSyntax){
+                throw string("Error: Invalid usage of " + command + " command");
+            }
+        }
+
         inline void assert(Object* obj){
             if(obj->getType() != datatype){
                 throw string("Error: key type mismatch");
@@ -33,8 +39,11 @@ class ListDriver{
             }
             return (ListDatatype*)obj->getValue();
         }
-
+    
+    public:
         inline string LPush(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
@@ -43,6 +52,8 @@ class ListDriver{
             return "1";
         }
         inline string RPush(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
@@ -51,12 +62,16 @@ class ListDriver{
             return "1";
         }
         inline string LPushIdx(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 4);
             ListDatatype* value = getValue(tokens[1]);
             value->pushAtIdx(stoi(tokens[3]), tokens[2]);
             return "1";
         }
-
+        
         string LPop(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 3);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = stoi(tokens[2]);
@@ -69,6 +84,8 @@ class ListDriver{
             return "1";
         }
         string RPop(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 3);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = stoi(tokens[2]);
@@ -81,17 +98,23 @@ class ListDriver{
             return "1";
         }
         inline string LPopIdx(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 3);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             value->popAtIdx(stoi(tokens[2]));
             return "1";
         }
-
+        
         inline string LLen(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 2);
             db->assertKeyExists(tokens[1]);
             return to_string(getValue(tokens[1])->len());
         }
         string LIndex(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             string values = "";
@@ -102,6 +125,8 @@ class ListDriver{
             return values;
         }
         string LRange(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() != 4);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int start = stoi(tokens[2]);

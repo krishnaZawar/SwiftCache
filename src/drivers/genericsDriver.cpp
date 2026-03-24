@@ -14,7 +14,16 @@ class GenericsDriver{
     private:
         Database *db;
 
+        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+            if(wrongSyntax){
+                throw string("Error: Invalid usage of " + command + " command");
+            }
+        }
+
+    public:
         string Type(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 2);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{
@@ -28,6 +37,8 @@ class GenericsDriver{
         }
         
         string Del(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 2);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{
@@ -42,6 +53,8 @@ class GenericsDriver{
         }
         
         string Expire(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3 || tokens.size() % 2 == 0);
             string res = "";
             int expiry;
             for(int i = 1; i < tokens.size(); i+=2){
@@ -64,6 +77,8 @@ class GenericsDriver{
         }
         
         string Persist(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 2);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{

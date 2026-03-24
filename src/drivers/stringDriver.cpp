@@ -21,7 +21,16 @@ class StringDriver{
             }
         }
 
+        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+            if(wrongSyntax){
+                throw string("Error: Invalid usage of " + command + " command");
+            }
+        }
+
+    public:
         string Set(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 3 || tokens.size() % 2 == 0);
             Object* obj;
             for(int i = 1; i < tokens.size(); i+=2){
                 obj = db->getObject(tokens[i]);
@@ -48,6 +57,8 @@ class StringDriver{
         }
         
         string Get(vector<string> &tokens){
+            db->runExpiryLoop();
+            assertSyntaxCheck(tokens[0], tokens.size() < 2);
             string values = "";
             Object* obj;
             for(int i = 1; i < tokens.size(); i++){
