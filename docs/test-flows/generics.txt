@@ -1,0 +1,29 @@
+DEL command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Bulk delete
+        2. Invalid command name
+        3. Only command name passed
+
+TYPE command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Bulk fetch
+        3. Invalid command name
+        4. Only command name passed
+
+EXPIRE command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Bulk expire
+        3. Invalid command name
+        4. Only command name passed
+        5. Time is not an integer
+        6. Key-time pair incomplete
+
+PERSIST command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Bulk persist
+        3. Invalid command name
+        4. Only command name passed

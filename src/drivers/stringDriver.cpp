@@ -1,5 +1,7 @@
 #include<string>
 #include<vector>
+
+#include "../constants/const.h"
 #include "../database/database.cpp"
 #include "../models/models.h"
 
@@ -21,16 +23,16 @@ class StringDriver{
             }
         }
 
-        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+        inline void assertSyntaxCheck(bool wrongSyntax, const string &errMsg) {
             if(wrongSyntax){
-                throw string("Error: Invalid usage of " + command + " command");
+                throw errMsg;
             }
         }
 
     public:
         string Set(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 3 || tokens.size() % 2 == 0);
+            assertSyntaxCheck(tokens.size() < 3 || tokens.size() % 2 == 0, ERR_SET_COMM);
             Object* obj;
             for(int i = 1; i < tokens.size(); i+=2){
                 obj = db->getObject(tokens[i]);
@@ -58,7 +60,7 @@ class StringDriver{
         
         string Get(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 2);
+            assertSyntaxCheck(tokens.size() < 2, ERR_GET_COMM);
             string values = "";
             Object* obj;
             for(int i = 1; i < tokens.size(); i++){

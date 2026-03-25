@@ -1,5 +1,7 @@
 #include<string>
 #include<vector>
+
+#include "../constants/const.h"
 #include "../database/database.cpp"
 
 #ifndef GenericsDriver_class
@@ -14,16 +16,16 @@ class GenericsDriver{
     private:
         Database *db;
 
-        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+        inline void assertSyntaxCheck(bool wrongSyntax, const string &errMsg) {
             if(wrongSyntax){
-                throw string("Error: Invalid usage of " + command + " command");
+                throw errMsg;
             }
         }
 
     public:
         string Type(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 2);
+            assertSyntaxCheck(tokens.size() < 2, ERR_TYPE_COMM);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{
@@ -38,7 +40,7 @@ class GenericsDriver{
         
         string Del(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 2);
+            assertSyntaxCheck(tokens.size() < 2, ERR_DEL_COMM);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{
@@ -54,7 +56,7 @@ class GenericsDriver{
         
         string Expire(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 3 || tokens.size() % 2 == 0);
+            assertSyntaxCheck(tokens.size() < 3 || tokens.size() % 2 == 0, ERR_EXPIRE_COMM);
             string res = "";
             int expiry;
             for(int i = 1; i < tokens.size(); i+=2){
@@ -72,13 +74,16 @@ class GenericsDriver{
                 catch(string &err){
                     res += "0";
                 }
+                catch(...){
+                    res += "0";
+                }
             }
             return res;
         }
         
         string Persist(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 2);
+            assertSyntaxCheck(tokens.size() < 2, ERR_PERSIST_COMM);
             string res = "";
             for(int i = 1; i < tokens.size(); i++){
                 try{

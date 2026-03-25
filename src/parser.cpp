@@ -139,7 +139,7 @@ class Parser{
                 return "";
             }
             if(!commandMp.count(tokens[0])) {
-                throw string("Error: Invalid Command");
+                throw ERR_NO_COMM;
             }
             switch(commandMp[tokens[0]]) {
                 // string commands
@@ -215,7 +215,7 @@ class Parser{
             //         return genericsDriver.execDriver(tokens);
             //         break;
             //     default:
-            //         throw string("Error: Invalid Command");
+            //         throw ERR_NO_COMM;
             // }
             return "";
         }

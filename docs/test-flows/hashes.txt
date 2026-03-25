@@ -1,0 +1,53 @@
+HSET command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+        4. No field-value pairs passed
+        5. Field-value pairs incomplete
+
+HGET command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+        4. No field name passed
+
+HGETALL command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+
+HKEYS command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+
+HDEL command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+        4. No field name passed
+
+HEXISTS command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+        4. No field name passed
+
+HLEN command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+
+HSTRLEN command:
+    Syntax check flows:
+        1. Correct syntax
+        2. Invalid command name
+        3. Only command name passed
+        4. No field name passed

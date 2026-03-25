@@ -1,5 +1,7 @@
 #include<string>
 #include<vector>
+
+#include "../constants/const.h"
 #include "../database/database.cpp"
 #include "../models/models.h"
 
@@ -16,9 +18,9 @@ class ListDriver{
         char datatype = 'l';
         Database *db;
 
-        inline void assertSyntaxCheck(string &command, bool wrongSyntax) {
+        inline void assertSyntaxCheck(bool wrongSyntax, const string &errMsg) {
             if(wrongSyntax){
-                throw string("Error: Invalid usage of " + command + " command");
+                throw errMsg;
             }
         }
 
@@ -43,7 +45,7 @@ class ListDriver{
     public:
         inline string LPush(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 3);
+            assertSyntaxCheck(tokens.size() < 3, ERR_LPUSH_COMM);
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
@@ -53,7 +55,7 @@ class ListDriver{
         }
         inline string RPush(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 3);
+            assertSyntaxCheck(tokens.size() < 3, ERR_RPUSH_COMM);
             string key = tokens[1];
             ListDatatype* value = getValue(key);
             for(int i = 2; i < tokens.size(); i++){
@@ -63,7 +65,7 @@ class ListDriver{
         }
         inline string LPushIdx(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 4);
+            assertSyntaxCheck(tokens.size() != 4, ERR_LPUSHIDX_COMM);
             ListDatatype* value = getValue(tokens[1]);
             value->pushAtIdx(stoi(tokens[3]), tokens[2]);
             return "1";
@@ -71,7 +73,7 @@ class ListDriver{
         
         string LPop(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 3);
+            assertSyntaxCheck(tokens.size() != 3, ERR_LPOP_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = stoi(tokens[2]);
@@ -85,7 +87,7 @@ class ListDriver{
         }
         string RPop(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 3);
+            assertSyntaxCheck(tokens.size() != 3, ERR_RPOP_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = stoi(tokens[2]);
@@ -99,7 +101,7 @@ class ListDriver{
         }
         inline string LPopIdx(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 3);
+            assertSyntaxCheck(tokens.size() != 3, ERR_LPOPIDX_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             value->popAtIdx(stoi(tokens[2]));
@@ -108,13 +110,13 @@ class ListDriver{
         
         inline string LLen(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 2);
+            assertSyntaxCheck(tokens.size() != 2, ERR_LLEN_COMM);
             db->assertKeyExists(tokens[1]);
             return to_string(getValue(tokens[1])->len());
         }
         string LIndex(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() < 3);
+            assertSyntaxCheck(tokens.size() < 3, ERR_LINDEX_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             string values = "";
@@ -126,7 +128,7 @@ class ListDriver{
         }
         string LRange(vector<string> &tokens){
             db->runExpiryLoop();
-            assertSyntaxCheck(tokens[0], tokens.size() != 4);
+            assertSyntaxCheck(tokens.size() != 4, ERR_LRANGE_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int start = stoi(tokens[2]);
