@@ -1,17 +1,19 @@
 HSET command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No field-value pairs passed
-        5. Field-value pairs incomplete
+        2. Bulk write
+        3. Invalid command name
+        4. Only command name passed
+        5. No field-value pairs passed
+        6. Field-value pairs incomplete
 
 HGET command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No field name passed
+        2. Bulk fetch
+        3. Invalid command name
+        4. Only command name passed
+        5. No field name passed
 
 HGETALL command:
     Syntax check flows:
@@ -28,16 +30,18 @@ HKEYS command:
 HDEL command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No field name passed
+        2. Bulk delete
+        3. Invalid command name
+        4. Only command name passed
+        5. No field name passed
 
 HEXISTS command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No field name passed
+        2. Bulk check
+        3. Invalid command name
+        4. Only command name passed
+        5. No field name passed
 
 HLEN command:
     Syntax check flows:
@@ -48,6 +52,7 @@ HLEN command:
 HSTRLEN command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No field name passed
+        2. Bulk fetch
+        3. Invalid command name
+        4. Only command name passed
+        5. No field name passed

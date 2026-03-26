@@ -1,7 +1,7 @@
 #include<string>
 #include<vector>
 
-#include "../constants/const.h"
+#include "../base/const.h"
 #include "../database/database.cpp"
 #include "../models/models.h"
 
@@ -119,7 +119,6 @@ class HashDriver{
             string existsStr = "";
             for(int i = 2; i < tokens.size(); i++){
                 existsStr += (value->fieldExists(tokens[i])? "1" : "0");
-                existsStr += "";
             }
             return existsStr;
         }
@@ -151,62 +150,6 @@ class HashDriver{
         HashDriver() {}
         HashDriver(Database *_db){
             db = _db;
-        }
-
-        string execDriver(vector<string> &tokens){
-            db->runExpiryLoop();
-            if(tokens[0] == "HSET"){
-                if(tokens.size() < 4 || tokens.size() % 2 != 0){
-                    throw string("Error: Invalid usage of HSET command");
-                }
-                return HSet(tokens);
-            }
-            else if(tokens[0] == "HGET"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of HGET command");
-                }
-                return HGet(tokens);
-            }
-            else if(tokens[0] == "HGETALL"){
-                if(tokens.size() != 2){
-                    throw string("Error: Invalid usage of HGETALL command");
-                }
-                return HGetAll(tokens);
-            }
-            else if(tokens[0] == "HKEYS"){
-                if(tokens.size() != 2){
-                    throw string("Error: Invalid usage of HKEYS command");
-                }
-                return HKeys(tokens);
-            }
-            else if(tokens[0] == "HDEL"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of HDEL command");
-                }
-                return HDel(tokens);
-            }
-            else if(tokens[0] == "HEXISTS"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of HEXISTS command");
-                }
-                return HExists(tokens);
-            }
-            else if(tokens[0] == "HLEN"){
-                if(tokens.size() != 2){
-                    throw string("Error: Invalid usage of HLEN command");
-                }
-                return HLen(tokens);
-            }
-            else if(tokens[0] == "HSTRLEN"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of HSTRLEN command");
-                }
-                return HStrLen(tokens);
-            }
-            else{
-                throw string("Error: Invalid Command");
-            }
-            return "";
         }
 };
 

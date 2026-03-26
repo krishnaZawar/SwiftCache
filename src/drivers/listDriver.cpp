@@ -1,16 +1,16 @@
 #include<string>
 #include<vector>
 
-#include "../constants/const.h"
+#include "../base/const.h"
 #include "../database/database.cpp"
 #include "../models/models.h"
+#include "../utils/utils.h"
 
 #ifndef ListDriver_class
 #define ListDriver_class
 
 using std::string;
 using std::vector;
-using std::stoi;
 using std::to_string;
 
 class ListDriver{
@@ -67,7 +67,12 @@ class ListDriver{
             db->runExpiryLoop();
             assertSyntaxCheck(tokens.size() != 4, ERR_LPUSHIDX_COMM);
             ListDatatype* value = getValue(tokens[1]);
-            value->pushAtIdx(stoi(tokens[3]), tokens[2]);
+            try{
+                value->pushAtIdx(strToInt(tokens[3]), tokens[2]);
+            } 
+            catch(string& err) {
+                throw err;
+            }
             return "1";
         }
         
@@ -76,7 +81,7 @@ class ListDriver{
             assertSyntaxCheck(tokens.size() != 3, ERR_LPOP_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
-            int count = stoi(tokens[2]);
+            int count = strToInt(tokens[2]);
             if(count > value->len()){
                 throw string("Error: pop count is greater than list size");
             }
@@ -90,7 +95,7 @@ class ListDriver{
             assertSyntaxCheck(tokens.size() != 3, ERR_RPOP_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
-            int count = stoi(tokens[2]);
+            int count = strToInt(tokens[2]);
             if(count > value->len()){
                 throw string("Error: pop count is greater than list size");
             }
@@ -104,7 +109,15 @@ class ListDriver{
             assertSyntaxCheck(tokens.size() != 3, ERR_LPOPIDX_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
-            value->popAtIdx(stoi(tokens[2]));
+            try{
+                value->popAtIdx(strToInt(tokens[2]));
+            }
+            catch(string &err) {
+                throw err;
+            }
+            catch(...) {
+                throw ERR_EXPECTED_INTEGER;
+            }
             return "1";
         }
         
@@ -121,7 +134,15 @@ class ListDriver{
             ListDatatype* value = getValue(tokens[1]);
             string values = "";
             for(int i = 2; i < tokens.size(); i++){
-                values += value->getIdx(stoi(tokens[i])) + "\n";
+                try{
+                    values += value->getIdx(strToInt(tokens[i])) + "\n";
+                } 
+                catch(string &err) {
+                    throw err;
+                }
+                catch(...) {
+                    throw ERR_EXPECTED_INTEGER;
+                }
             }
             values.pop_back();
             return values;
@@ -131,8 +152,8 @@ class ListDriver{
             assertSyntaxCheck(tokens.size() != 4, ERR_LRANGE_COMM);
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
-            int start = stoi(tokens[2]);
-            int end = stoi(tokens[3]);
+            int start = strToInt(tokens[2]);
+            int end = strToInt(tokens[3]);
             value->assertIdxBounds(start);
             value->assertIdxBounds(end);
             string returnVal = "";
@@ -148,68 +169,6 @@ class ListDriver{
         ListDriver() {}
         ListDriver(Database *_db){
             db = _db;
-        }
-
-        string execDriver(vector<string> &tokens){
-            db->runExpiryLoop();
-            if(tokens[0] == "LPUSH"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of LPUSH command");
-                }
-                return LPush(tokens);
-            }
-            else if(tokens[0] == "RPUSH"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of RPUSH command");
-                }
-                return RPush(tokens);
-            }
-            else if(tokens[0] == "LPUSHIDX"){
-                if(tokens.size() != 4){
-                    throw string("Error: Invalid usage of LPUSHIDX command");
-                }
-                return LPushIdx(tokens);
-            }
-            else if(tokens[0] == "LPOP"){
-                if(tokens.size() != 3){
-                    throw string("Error: Invalid usage of LPOP command");
-                }
-                return LPop(tokens);
-            }
-            else if(tokens[0] == "RPOP"){
-                if(tokens.size() != 3){
-                    throw string("Error: Invalid usage of RPOP command");
-                }
-                return RPop(tokens);
-            }
-            else if(tokens[0] == "LPOPIDX"){
-                if(tokens.size() != 3){
-                    throw string("Error: Invalid usage of LPOPIDX command");
-                }
-                return LPopIdx(tokens);
-            }
-            else if(tokens[0] == "LLEN"){
-                if(tokens.size() != 2){
-                    throw string("Error: Invalid usage of LLEN command");
-                }
-                return LLen(tokens);
-            }
-            else if(tokens[0] == "LINDEX"){
-                if(tokens.size() < 3){
-                    throw string("Error: Invalid usage of LINDEX command");
-                }
-                return LIndex(tokens);
-            }
-            else if(tokens[0] == "LRANGE"){
-                if(tokens.size() != 4){
-                    throw string("Error: Invalid usage of LRANGE command");
-                }
-                return LRange(tokens);
-            }
-            else{
-                throw string("Error: Invalid Command");
-            }
-            return "";
         }
 };
 

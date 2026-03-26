@@ -38,7 +38,7 @@ enum Command {
     COMM_HSTRLEN
 };
 
-
+const string ERR_EXPECTED_INTEGER = "Error: Expected an integer value";
 const string ERR_NO_COMM = "Error: Invalid command";
 
 // string commands

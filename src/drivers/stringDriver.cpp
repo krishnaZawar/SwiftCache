@@ -1,7 +1,7 @@
 #include<string>
 #include<vector>
 
-#include "../constants/const.h"
+#include "../base/const.h"
 #include "../database/database.cpp"
 #include "../models/models.h"
 
@@ -83,26 +83,6 @@ class StringDriver{
         StringDriver() {}
         StringDriver(Database *_db){
             db = _db;
-        }
-
-        string execDriver(vector<string> &tokens){
-            db->runExpiryLoop();
-            if(tokens[0] == "SET"){
-                if(tokens.size() < 3 || tokens.size() % 2 == 0){
-                    throw string("Error: Invalid usage of SET command");
-                }
-                return Set(tokens);
-            }
-            else if(tokens[0] == "GET"){
-                if(tokens.size() < 2){
-                    throw string("Error: Invalid usage of GET command");
-                }
-                return Get(tokens);
-            }
-            else{
-                throw string("Error: Invalid Command");
-            }
-            return "";
         }
 };
 

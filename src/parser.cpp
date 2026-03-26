@@ -3,7 +3,7 @@
 #include<iostream>
 #include<unordered_map>
 
-#include "constants/const.h"
+#include "base/const.h"
 #include "drivers/drivers.h"
 
 #ifndef Parser_class
@@ -15,19 +15,6 @@ using std::unordered_map;
 
 class Parser{
     private:
-        /*
-            unused currently, might be required later
-        */
-        template<class t>
-        bool existsIn(vector<t> &arr, t val){
-            for(auto &_val: arr){
-                if(val == _val){
-                    return true;
-                }
-            }
-            return false;
-        }
-        
         vector<string> tokenize(const char* command, int size){
             vector<string> tokens;
             string cur = "";
@@ -196,27 +183,6 @@ class Parser{
                 case COMM_HSTRLEN:
                     return hashDriver.HStrLen(tokens);
             }
-            // switch(tokens[0][0]){
-            //     case 'S':
-            //     case 'G':
-            //         return stringDriver.execDriver(tokens);
-            //         break;
-            //     case 'L':
-            //     case 'R':
-            //         return listDriver.execDriver(tokens);
-            //         break;
-            //     case 'H':
-            //         return hashDriver.execDriver(tokens);
-            //         break;
-            //     case 'D':
-            //     case 'T':
-            //     case 'E':
-            //     case 'P':
-            //         return genericsDriver.execDriver(tokens);
-            //         break;
-            //     default:
-            //         throw ERR_NO_COMM;
-            // }
             return "";
         }
 };

@@ -1,16 +1,18 @@
 LPUSH command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No values passed
+        2. Bulk insert
+        3. Invalid command name
+        4. Only command name passed
+        5. No values passed
 
 RPUSH command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. No values passed
+        2. Bulk insert
+        3. Invalid command name
+        4. Only command name passed
+        5. No values passed
 
 LPUSHIDX command:
     Syntax check flows:
@@ -54,10 +56,11 @@ LLEN command:
 LINDEX command:
     Syntax check flows:
         1. Correct syntax
-        2. Invalid command name
-        3. Only command name passed
-        4. Index not passed
-        5. Index passed is not integer
+        2. Bulk fetch
+        3. Invalid command name
+        4. Only command name passed
+        5. Index not passed
+        6. Index passed is not an integer
 
 LRANGE command:
     Syntax check flows:
