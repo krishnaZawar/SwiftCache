@@ -1,0 +1,4 @@
+Flows for string sanity checks:
+    1. SET(k, v) -> GET(k) -> v
+    2. SET(k1, v) -> GET(k2) -> key not found
+    3. SET(k1, v1, k2, v2, k3, v3, k4, v4) -> GET(k1, k2, k3, k4) -> v1, v2, v3, v4
