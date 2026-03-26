@@ -19,7 +19,7 @@ class StringDriver{
 
         inline void assert(Object* obj){
             if(obj->getType() != datatype){
-                throw string("Error: key type mismatch");
+                throw ERR_TYPE_MISMATCH;
             }
         }
 
