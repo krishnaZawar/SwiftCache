@@ -1,15 +1,16 @@
 #include<iostream>
 #include<string>
-#include<winsock2.h>
-#include<ws2tcpip.h>
-#include<windows.h>
+#include<cstring>
 
 #include "parser.cpp"
 #include "database/database.cpp"
+#include "platform/socket.cpp"
 
 // #include<ctime>
 
-#pragma comment(lib, "ws2_32.lib") // Link Winsock library
+#ifdef _WIN32
+#pragma comment(lib, "ws2_32.lib")
+#endif
 
 using std::exception;
 using std::cout;
@@ -33,17 +34,15 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    WSADATA wsaData;
-    int result = WSAStartup(MAKEWORD(2, 2), &wsaData); // Request Winsock 2.2
-    if (result != 0) {
-        cerr << "WSAStartup failed: " << result << endl;
+    if (!initSockets()) {
+        cerr << "Socket initialization failed: " << getSocketError() << endl;
         return 1;
     }
 
-    SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (serverSocket == INVALID_SOCKET) {
-        cerr << "Failed to create socket: " << WSAGetLastError() << endl;
-        WSACleanup();
+    Socket serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (serverSocket == INVALID_SOCKET_FD) {
+        cerr << "Failed to create socket: " << getSocketError() << endl;
+        cleanupSockets();
         return 1;
     }
 
@@ -52,30 +51,30 @@ int main(int argc, char* argv[]){
     serverAddr.sin_port = htons(PORT); // Port number
     serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        cerr << "Bind failed: " << WSAGetLastError() << endl;
-        closesocket(serverSocket);
-        WSACleanup();
+    if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR_CODE) {
+        cerr << "Bind failed: " << getSocketError() << endl;
+        closeSocket(serverSocket);
+        cleanupSockets();
         return 1;
     }
 
     Database db;
     Parser parser (&db);
 
-    if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
-        cerr << "Listen failed: " << WSAGetLastError() << endl;
-        closesocket(serverSocket);
-        WSACleanup();
+    if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR_CODE) {
+        cerr << "Listen failed: " << getSocketError() << endl;
+        closeSocket(serverSocket);
+        cleanupSockets();
         return 1;
     }
 
     cout << "Server is listening on port " << PORT << "..." << endl;
 
-    SOCKET clientSocket = accept(serverSocket, nullptr, nullptr);
-    if (clientSocket == INVALID_SOCKET) {
-        cerr << "Accept failed: " << WSAGetLastError() << endl;
-        closesocket(serverSocket);
-        WSACleanup();
+    Socket clientSocket = accept(serverSocket, nullptr, nullptr);
+    if (clientSocket == INVALID_SOCKET_FD) {
+        cerr << "Accept failed: " << getSocketError() << endl;
+        closeSocket(serverSocket);
+        cleanupSockets();
         return 1;
     }
     
@@ -91,7 +90,7 @@ int main(int argc, char* argv[]){
             cout << "Client disconnected" << endl;
             break;
         } else {
-            cerr << "recv() error: " << WSAGetLastError() << endl;
+            cerr << "recv() error: " << getSocketError() << endl;
             break;
         }
         if(!strcmp(command, "EXIT")){
@@ -106,12 +105,12 @@ int main(int argc, char* argv[]){
         catch(exception &e){
             resp = e.what();
         }
-        send(clientSocket, resp.c_str(), resp.size(), 0);
+        send(clientSocket, resp.c_str(), static_cast<int>(resp.size()), 0);
     }
 
-    closesocket(clientSocket);
-    closesocket(serverSocket);
-    WSACleanup();
+    closeSocket(clientSocket);
+    closeSocket(serverSocket);
+    cleanupSockets();
 
     db.printDetails();
 

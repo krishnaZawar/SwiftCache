@@ -4,7 +4,14 @@ The ultimate single-threaded in-memory database written from scratch in C++.
 ## How to use
 1. Build the database using
 ```
+# macOS/Linux
+g++ src/main.cpp -o db
+
+# Windows (MinGW)
 g++ src/main.cpp -o db -lws2_32
+
+# Windows (MSVC - Developer Command Prompt)
+cl /EHsc src\main.cpp /Fe:db.exe /link ws2_32.lib
 ```
 2. Start the DB server using
 ```
