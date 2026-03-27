@@ -1,13 +1,18 @@
 #include<iostream>
 #include<iomanip>
+#include<vector>
 
 #include "../src/parser.cpp"
+
+#ifndef TestUtils_h
+#define TestUtils_h
 
 using std::string;
 using std::cout;
 using std::endl;
 using std::left;
 using std::setw;
+using std::vector;
 
 void printHeading(string heading) {
     int pad = 30 - heading.size()/2;
@@ -27,3 +32,16 @@ string executeCommand(Parser &parser, string &command) {
     }
     return resp;
 }
+
+void executeFlow(string flowName, Parser &parser, vector<string> &commands, string expectedOutput, int outputIndex) {
+    int n = commands.size();
+    for(int i = 0; i < n; i++) {
+        if (outputIndex != i) {
+            executeCommand(parser, commands[i]);
+        } else {
+            AssertEqual(flowName, executeCommand(parser, commands[i]), expectedOutput);
+        }
+    }
+}
+
+#endif // TestUtils_h

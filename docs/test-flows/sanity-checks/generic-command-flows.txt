@@ -1,19 +1,15 @@
 Flows for generic command sanity checks:
-    1. DEL(k) -> delete k
-    2. DEL(k) -> key not found
-    3. DEL(k1, k2, k3) -> delete k1, k2, k3
+    flow 1. SET(k, v) -> DEL(k) -> GET(k) -> key not found
+    flow 2. DEL(k) -> key not found
     
-    4. TYPE(k) -> type k
-    5. TYPE(k) -> key not found
-    6. TYPE(k1, k2, k3, k4) -> string k1, list k2, hash k3, nil k4
+    flow 3.SET(k, v) -> TYPE(k) -> type k
+    flow 4. TYPE(k) -> key not found
+    flow 5. SET(k1, v) -> LPUSH(k2, v) -> HSET(k3, f, v) -> TYPE(k1, k2, k3, k4) -> string k1, list k2, hash k3, nil k4
 
-    7. EXPIRE(k, 1) -> expire key after 1 seconds
-    8. EXPIRE(k, 1) -> key does not exist
-    9. EXPIRE(k1, 1, k2, 1, k3, 1) -> delete k1, k2, k3 after 1 seconds
+    flow 6. SET(k, v) -> EXPIRE(k, 1) -> expire key after 1 seconds
+    flow 7. EXPIRE(k, 1) -> key does not exist
 
-    10. PERSIST(k) -> persist k
-    11. PERSIST(k) -> key not found
-    12. PERSIST(k1, k2, k3) -> persist k1, k2, k3
+    flow 8. SET(k, v) -> EXPIRE(k, 1) -> PERSIST(k) -> persist k
+    flow 9. PERSIST(k) -> key not found
 
-    13. EXPIRE(k, 10) -> PERSIST(k) -> persist k after 10 seconds
-    14. EXPIRE(k1, 10, k2, 10, k3, 10) -> PERSIST(k1, k2, k3) -> persist k1, k2, k3 after 10 seconds
+    flow 10. SET(k, v) -> EXPIRE(k, -1) -> time is negative

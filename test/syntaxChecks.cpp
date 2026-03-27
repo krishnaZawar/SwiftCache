@@ -90,7 +90,6 @@ void syntaxCheck_genericCommands() {
     
     command = "EXPIRE key a21";
     AssertEqual("Time is not an integer", executeCommand(parser, command), "0");
-    
     cout <<endl;
 
 // ------------------------------------------ PERSIST command -------------------------------------------------
@@ -193,6 +192,9 @@ void syntaxCheck_listCommands() {
 
     command = "LPUSHIDX k1 1 a1";
     AssertEqual("Index is not an integer", executeCommand(parser, command), ERR_EXPECTED_INTEGER);
+
+    command = "LPUSHIDX k1 1  1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_LPUSHIDX_COMM);
     
     cout <<endl;
 
@@ -213,6 +215,9 @@ void syntaxCheck_listCommands() {
 
     command = "LPOP k1 a1";
     AssertEqual("Count is not an integer", executeCommand(parser, command), ERR_EXPECTED_INTEGER);
+
+    command = "LPOP k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_LPOP_COMM);
     
     cout <<endl;
 
@@ -233,6 +238,9 @@ void syntaxCheck_listCommands() {
 
     command = "RPOP k1 a1";
     AssertEqual("Count is not an integer", executeCommand(parser, command), ERR_EXPECTED_INTEGER);
+
+    command = "RPOP k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_RPOP_COMM);
     
     cout <<endl;
 
@@ -253,6 +261,9 @@ void syntaxCheck_listCommands() {
 
     command = "LPOPIDX k1 a1";
     AssertEqual("Count is not an integer", executeCommand(parser, command), ERR_EXPECTED_INTEGER);
+
+    command = "LPOPIDX k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_LPOPIDX_COMM);
     
     cout <<endl;
 
@@ -267,6 +278,9 @@ void syntaxCheck_listCommands() {
     
     command = "LLEN";
     AssertEqual("Only command name passed", executeCommand(parser, command), ERR_LLEN_COMM);
+
+    command = "LLEN k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_LLEN_COMM);
     
     cout <<endl;
 
@@ -316,6 +330,9 @@ void syntaxCheck_listCommands() {
 
     command = "LRANGE k1 0a 1";
     AssertEqual("Start index is not an integer", executeCommand(parser, command), ERR_EXPECTED_INTEGER);
+
+    command = "LRANGE k1 1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_LRANGE_COMM);
     
     cout <<endl;
 }
@@ -379,6 +396,9 @@ void syntaxCheck_hashCommands() {
     
     command = "HGETALL";
     AssertEqual("Only command name passed", executeCommand(parser, command), ERR_HGETALL_COMM);
+
+    command = "HGETALL k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_HGETALL_COMM);
     
     cout <<endl;
 
@@ -393,6 +413,9 @@ void syntaxCheck_hashCommands() {
     
     command = "HKEYS";
     AssertEqual("Only command name passed", executeCommand(parser, command), ERR_HKEYS_COMM);
+
+    command = "HKEYS k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_HKEYS_COMM);
     
     cout <<endl;
 
@@ -447,6 +470,9 @@ void syntaxCheck_hashCommands() {
     
     command = "HLEN";
     AssertEqual("Only command name passed", executeCommand(parser, command), ERR_HLEN_COMM);
+
+    command = "HLEN k1 1 1";
+    AssertEqual("Extra params passed", executeCommand(parser, command), ERR_HLEN_COMM);
     
     cout <<endl;
 

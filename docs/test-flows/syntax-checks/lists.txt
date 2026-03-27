@@ -22,6 +22,7 @@ LPUSHIDX command:
         4. Index not passed
         5. Index and value not passed
         6. Index is not an integer
+        7. Extra params passed
 
 LPOP command:
     Syntax check flows:
@@ -30,6 +31,7 @@ LPOP command:
         3. Only command name passed
         4. Count not passed
         5. Count is not an integer
+        6. Extra params passed
 
 RPOP command:
     Syntax check flows:
@@ -38,6 +40,7 @@ RPOP command:
         3. Only command name passed
         4. Count not passed
         5. Count is not an integer
+        6. Extra params passed
 
 LPOPIDX command:
     Syntax check flows:
@@ -46,12 +49,14 @@ LPOPIDX command:
         3. Only command name passed
         4. Index is not passed
         5. Index is not an integer
+        6. Extra params passed
 
 LLEN command:
     Syntax check flows:
         1. Correct syntax
         2. Invalid command name
         3. Only command name passed
+        4. Extra params passed
 
 LINDEX command:
     Syntax check flows:
@@ -71,3 +76,4 @@ LRANGE command:
         5. Start index and end index is not passed
         6. End index is not an integer
         7. Start index is not an integer
+        8. Extra params passed

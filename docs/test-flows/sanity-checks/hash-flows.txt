@@ -1,0 +1,23 @@
+Flows for hash sanity checks:
+    1. HSET(k, f1, v1, f2, v2) -> HGET(k, f1, f2) -> return v1 v2
+    2. HSET(k, f1, v1, f2, v2, f3, v3) -> HGETALL(k) -> return all data
+    3. HSET(k, f1, v1, f2, v2) -> HKEYS(k) -> return f1 f2
+
+    4. HSET(k, f1, v1) -> HDEL(k, f1) -> delete field
+    5. HSET(k, f1, v1) -> HDEL(k, f2) -> field not found
+
+    6. HSET(k, f1, v1) -> HEXISTS(k, f1) -> field exists
+    7. HSET(k, f1, v1) -> HEXISTS(k, f2) -> field does not exist
+
+    8. HSET(k, f1, v1) -> HLEN(k) -> length 1
+
+    9. HSET(k, f1, v1, f2, v2) -> HSTRLEN(k, f1, f2) -> length 2 2
+    10. HSET(k, f1, v1, f2, v2) -> HSTRLEN(k, f3) -> field does not exist
+
+    11. HGET(k, f1) -> key not found
+    12. HGETALL(k) -> key not found
+    13. HKEYS(k) -> key not found
+    14. HDEL(k, f1) -> key not found
+    15. HEXISTS(k, f1) -> key not found
+    16. HLEN(k) -> key not found
+    17. HSTRLEN(k, f1) -> key not found

@@ -1,6 +1,7 @@
 #include<windows.h>
 
 #include "syntaxChecks.cpp"
+#include "sanityChecks.cpp"
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
@@ -16,6 +17,11 @@ int main() {
     cout << endl;
     syntaxCheck_hashCommands();
     cout << endl;
-    
+
+    sanityCheck_stringCommands();
+    cout << endl;
+    sanityCheck_genericCommands();
+    cout << endl;
+
     return 0;
 }

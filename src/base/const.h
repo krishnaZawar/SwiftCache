@@ -5,6 +5,7 @@
 
 using std::string;
 
+const string ERR_KEY_NOT_FOUND = "Error: Key not found";
 const string ERR_TYPE_MISMATCH = "Error: key type mismatch";
 const string ERR_EXPECTED_INTEGER = "Error: Expected an integer value";
 const string ERR_NO_COMM = "Error: Invalid command";

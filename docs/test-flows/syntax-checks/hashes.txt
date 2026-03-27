@@ -20,12 +20,14 @@ HGETALL command:
         1. Correct syntax
         2. Invalid command name
         3. Only command name passed
+        4. Extra params passed
 
 HKEYS command:
     Syntax check flows:
         1. Correct syntax
         2. Invalid command name
         3. Only command name passed
+        4. Extra params passed
 
 HDEL command:
     Syntax check flows:
@@ -48,6 +50,7 @@ HLEN command:
         1. Correct syntax
         2. Invalid command name
         3. Only command name passed
+        4. Extra params passed
 
 HSTRLEN command:
     Syntax check flows:

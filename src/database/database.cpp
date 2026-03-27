@@ -4,6 +4,7 @@
 #include<iostream>
 
 #include "../models/models.h"
+#include "../base/const.h"
 
 #ifndef Database_class
 #define Database_class
@@ -235,7 +236,7 @@ class Database{
         }
         inline void assertKeyExists(string key){
             if(!keyExists(key)){
-                throw string("Error: Key not found");
+                throw ERR_KEY_NOT_FOUND;
             }
         }
 
