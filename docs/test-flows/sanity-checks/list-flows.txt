@@ -1,34 +1,34 @@
 Flows for list sanity checks:
-    1. LPUSH(k, 1, 2, 3) -> LPOP(k, 3) -> fine
-    2. LPUSH(k, 1, 2, 3) -> LPOP(k, -1) -> out of bounds
-    3. LPUSH(k, 1, 2, 3) -> LPOP(k, 4) -> out of bounds
+    flow 1. LPUSH(k, 1, 2, 3) -> LPOP(k, 3) -> fine
+    flow 2. LPUSH(k, 1, 2, 3) -> LPOP(k, -1) -> out of bounds
+    flow 3. LPUSH(k, 1, 2, 3) -> LPOP(k, 4) -> out of bounds
 
-    4. RPUSH(k, 1, 2, 3) -> RPOP(k, 3) -> fine
-    5. RPUSH(k, 1, 2, 3) -> RPOP(k, -1) -> out of bounds
-    6. RPUSH(k, 1, 2, 3) -> RPOP(k, 4) -> out of bounds
+    flow 4. RPUSH(k, 1, 2, 3) -> RPOP(k, 3) -> fine
+    flow 5. RPUSH(k, 1, 2, 3) -> RPOP(k, -1) -> out of bounds
+    flow 6. RPUSH(k, 1, 2, 3) -> RPOP(k, 4) -> out of bounds
 
-    7. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, 0) -> fine
-    8. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, -1) -> out of bounds
-    9. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, 3) -> out of bounds
+    flow 7. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, 0) -> fine
+    flow 8. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, -1) -> out of bounds
+    flow 9. LPUSH(k, 1, 2, 3) -> LPUSHIDX(k, 0, 3) -> out of bounds
 
-    10. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, 1) -> fine
-    11. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, -1) -> out of bounds
-    12. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, 3) -> out of bounds
+    flow 10. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, 1) -> fine
+    flow 11. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, -1) -> out of bounds
+    flow 12. LPUSH(k, 1, 2, 3) -> LPOPIDX(k, 3) -> out of bounds
 
-    13. LPUSH(k, 1) -> LLEN(k) -> return length
+    flow 13. LPUSH(k, 1) -> LLEN(k) -> return length
 
-    14. LPUSH(k, 1, 2, 3) -> LINDEX(k, 0) -> fine
-    15. LPUSH(k, 1, 2, 3) -> LINDEX(k, -1) -> out of bounds
-    16. LPUSH(k, 1, 2, 3) -> LINDEX(k, 3) -> out of bounds
+    flow 14. LPUSH(k, 1, 2, 3) -> LINDEX(k, 0) -> fine
+    flow 15. LPUSH(k, 1, 2, 3) -> LINDEX(k, -1) -> out of bounds
+    flow 16. LPUSH(k, 1, 2, 3) -> LINDEX(k, 3) -> out of bounds
 
-    17. LPUSH(k, 1, 2, 3) -> LRANGE(k, 0, 2) -> fine
-    18. LPUSH(k, 1, 2, 3) -> LRANGE(k, -1, 2) -> out of bounds
-    19. LPUSH(k, 1, 2, 3) -> LRANGE(k, 0, 3) -> out of bounds
+    flow 17. LPUSH(k, 1, 2, 3) -> LRANGE(k, 0, 2) -> fine
+    flow 18. LPUSH(k, 1, 2, 3) -> LRANGE(k, -1, 2) -> out of bounds
+    flow 19. LPUSH(k, 1, 2, 3) -> LRANGE(k, 0, 3) -> out of bounds
 
-    20. LLEN(k) -> key not found
-    21. LPOP(k, 1) -> key not found
-    22. RPOP(k, 1) -> key not found
-    23. LPOPIDX(k, 1) -> key not found
-    24. LPUSHIDX(k, 1, 0) -> key not found
-    25. LINDEX(k, 1) -> key not found
-    26. LRANGE(k, 1, 2) -> key not found
+    flow 20. LLEN(k) -> key not found
+    flow 21. LPOP(k, 1) -> key not found
+    flow 22. RPOP(k, 1) -> key not found
+    flow 23. LPOPIDX(k, 1) -> key not found
+    flow 24. LPUSHIDX(k, 1, 0) -> key not found
+    flow 25. LINDEX(k, 1) -> key not found
+    flow 26. LRANGE(k, 1, 2) -> key not found

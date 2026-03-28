@@ -18,7 +18,7 @@ class ListDatatype{
         
         inline void assertIdxBounds(int idx){
             if(idx < 0 || idx >= list.size()){
-                throw string("Error: Index out of bounds");
+                throw ERR_INDEX_OUT_OF_BOUNDS;
             }
         }
 

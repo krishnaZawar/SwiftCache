@@ -22,6 +22,13 @@ int main() {
     cout << endl;
     sanityCheck_genericCommands();
     cout << endl;
+    sanityCheck_listCommands();
+    cout << endl;
+    sanityCheck_hashCommands();
+    cout << endl;
+    
+    sanityCheck_genericFlows();
+    cout << endl;
 
     return 0;
 }

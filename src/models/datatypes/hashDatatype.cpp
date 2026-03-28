@@ -15,7 +15,7 @@ class HashDatatype{
 
         inline void assertFieldExists(string field){
             if(!fieldExists(field)){
-                throw string("Error: field does not exist");
+                throw ERR_HASH_FIELD_DOES_NOT_EXIST;
             }
         }
     public:

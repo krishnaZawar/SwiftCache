@@ -1,44 +1,44 @@
 Flows for generic sanity checks:
-    1. SET(k, v) -> HSET(k, f1, v1) -> type mismatch
-    2. SET(k, v) -> HGET(k, f1) -> type mismatch
-    3. SET(k, v) -> HGETALL(k) -> type mismatch
-    4. SET(k, v) -> HKEYS(k) -> type mismatch
-    5. SET(k, v) -> HDEL(k, f1) -> type mismatch
-    6. SET(k, v) -> HEXISTS(k, f1) -> type mismatch
-    7. SET(k, v) -> HLEN(k) -> type mismatch
-    8. SET(k, v) -> HSTRLEN(k, f1) -> type mismatch
+    flow 1. SET(k, v) -> HSET(k, f1, v1) -> type mismatch
+    flow 2. SET(k, v) -> HGET(k, f1) -> type mismatch
+    flow 3. SET(k, v) -> HGETALL(k) -> type mismatch
+    flow 4. SET(k, v) -> HKEYS(k) -> type mismatch
+    flow 5. SET(k, v) -> HDEL(k, f1) -> type mismatch
+    flow 6. SET(k, v) -> HEXISTS(k, f1) -> type mismatch
+    flow 7. SET(k, v) -> HLEN(k) -> type mismatch
+    flow 8. SET(k, v) -> HSTRLEN(k, f1) -> type mismatch
 
-    9. SET(k, v) -> LPUSH(k, v) -> type mismatch
-    10. SET(k, v) -> RPUSH(k, v) -> type mismatch
-    11. SET(k, v) -> LPUSHIDX(k, v, 1) -> type mismatch
-    12. SET(k, v) -> LPOP(k, 1) -> type mismatch
-    13. SET(k, v) -> RPOP(k, 1) -> type mismatch
-    14. SET(k, v) -> LPOPIDX(k, 1) -> type mismatch
-    15. SET(k, v) -> LLEN(k) -> type mismatch
-    16. SET(k, v) -> LINDEX(k, 1) -> type mismatch
-    17. SET(k, v) -> LRANGE(k, 1, 1) -> type mismatch
+    flow 9. SET(k, v) -> LPUSH(k, v) -> type mismatch
+    flow 10. SET(k, v) -> RPUSH(k, v) -> type mismatch
+    flow 11. SET(k, v) -> LPUSHIDX(k, v, 1) -> type mismatch
+    flow 12. SET(k, v) -> LPOP(k, 1) -> type mismatch
+    flow 13. SET(k, v) -> RPOP(k, 1) -> type mismatch
+    flow 14. SET(k, v) -> LPOPIDX(k, 1) -> type mismatch
+    flow 15. SET(k, v) -> LLEN(k) -> type mismatch
+    flow 16. SET(k, v) -> LINDEX(k, 1) -> type mismatch
+    flow 17. SET(k, v) -> LRANGE(k, 1, 1) -> type mismatch
 
-    18. LPUSH(k, v) -> HSET(k, f1, v1) -> type mismatch
-    19. LPUSH(k, v) -> HGET(k, f1) -> type mismatch
-    20. LPUSH(k, v) -> HGETALL(k) -> type mismatch
-    21. LPUSH(k, v) -> HKEYS(k) -> type mismatch
-    22. LPUSH(k, v) -> HDEL(k, f1) -> type mismatch
-    23. LPUSH(k, v) -> HEXISTS(k, f1) -> type mismatch
-    24. LPUSH(k, v) -> HLEN(k) -> type mismatch
-    25. LPUSH(k, v) -> HSTRLEN(k, f1) -> type mismatch
+    flow 18. LPUSH(k, v) -> HSET(k, f1, v1) -> type mismatch
+    flow 19. LPUSH(k, v) -> HGET(k, f1) -> type mismatch
+    flow 20. LPUSH(k, v) -> HGETALL(k) -> type mismatch
+    flow 21. LPUSH(k, v) -> HKEYS(k) -> type mismatch
+    flow 22. LPUSH(k, v) -> HDEL(k, f1) -> type mismatch
+    flow 23. LPUSH(k, v) -> HEXISTS(k, f1) -> type mismatch
+    flow 24. LPUSH(k, v) -> HLEN(k) -> type mismatch
+    flow 25. LPUSH(k, v) -> HSTRLEN(k, f1) -> type mismatch
 
-    26. LPUSH(k, v) -> SET(k, v) -> type mismatch
-    27. LPUSH(k, v) -> GET(k, v) -> type mismatch
+    flow 26. LPUSH(k, v) -> SET(k, v) -> type mismatch
+    flow 27. LPUSH(k, v) -> GET(k) -> type mismatch
 
-    28. HSET(k, f, v) -> LPUSH(k, v) -> type mismatch
-    29. HSET(k, f, v) -> RPUSH(k, v) -> type mismatch
-    30. HSET(k, f, v) -> LPUSHIDX(k, v, 1) -> type mismatch
-    31. HSET(k, f, v) -> LPOP(k, 1) -> type mismatch
-    32. HSET(k, f, v) -> RPOP(k, 1) -> type mismatch
-    33. HSET(k, f, v) -> LPOPIDX(k, 1) -> type mismatch
-    34. HSET(k, f, v) -> LLEN(k) -> type mismatch
-    35. HSET(k, f, v) -> LINDEX(k, 1) -> type mismatch
-    36. HSET(k, f, v) -> LRANGE(k, 1, 1) -> type mismatch
+    flow 28. HSET(k, f, v) -> LPUSH(k, v) -> type mismatch
+    flow 29. HSET(k, f, v) -> RPUSH(k, v) -> type mismatch
+    flow 30. HSET(k, f, v) -> LPUSHIDX(k, v, 1) -> type mismatch
+    flow 31. HSET(k, f, v) -> LPOP(k, 1) -> type mismatch
+    flow 32. HSET(k, f, v) -> RPOP(k, 1) -> type mismatch
+    flow 33. HSET(k, f, v) -> LPOPIDX(k, 1) -> type mismatch
+    flow 34. HSET(k, f, v) -> LLEN(k) -> type mismatch
+    flow 35. HSET(k, f, v) -> LINDEX(k, 1) -> type mismatch
+    flow 36. HSET(k, f, v) -> LRANGE(k, 1, 1) -> type mismatch
 
-    37. HSET(k, f, v) -> SET(k, v) -> type mismatch
-    38. HSET(k, f, v) -> GET(k, v) -> type mismatch
+    flow 37. HSET(k, f, v) -> SET(k, v) -> type mismatch
+    flow 38. HSET(k, f, v) -> GET(k) -> type mismatch

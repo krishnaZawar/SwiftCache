@@ -22,6 +22,9 @@ const string ERR_EXPIRE_COMM = "Error: Invalid usage of EXPIRE command";
 const string ERR_PERSIST_COMM = "Error: Invalid usage of PERSIST command";
 
 // list commands
+const string ERR_INDEX_OUT_OF_BOUNDS = "Error: Index out of bounds";
+const string ERR_POP_COUNT_UNDERFLOW = "Error: Pop count cannot be negative";
+const string ERR_POP_COUNT_OVERFLOW = "Error: pop count is greater than list size";
 const string ERR_LPUSH_COMM = "Error: Invalid usage of LPUSH command";
 const string ERR_RPUSH_COMM = "Error: Invalid usage of RPUSH command";
 const string ERR_LPUSHIDX_COMM = "Error: Invalid usage of LPUSHIDX command";
@@ -41,5 +44,6 @@ const string ERR_HDEL_COMM = "Error: Invalid usage of HDEL command";
 const string ERR_HEXISTS_COMM = "Error: Invalid usage of HEXISTS command";
 const string ERR_HLEN_COMM = "Error: Invalid usage of HLEN command";
 const string ERR_HSTRLEN_COMM = "Error: Invalid usage of HSTRLEN command";
+const string ERR_HASH_FIELD_DOES_NOT_EXIST = "Error: field does not exist";
 
 #endif // const_header

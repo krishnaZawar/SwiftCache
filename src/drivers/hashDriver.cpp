@@ -139,7 +139,7 @@ class HashDriver{
                     lengths += to_string(value->strLen(tokens[i]))+"\n";
                 }
                 catch(string &err){
-                    throw err + "Error fetching field "+tokens[i];
+                    throw err + "\nError fetching field "+tokens[i];
                 }
             }
             lengths.pop_back();

@@ -66,6 +66,7 @@ class ListDriver{
         inline string LPushIdx(vector<string> &tokens){
             db->runExpiryLoop();
             assertSyntaxCheck(tokens.size() != 4, ERR_LPUSHIDX_COMM);
+            db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             try{
                 value->pushAtIdx(strToInt(tokens[3]), tokens[2]);
@@ -82,8 +83,11 @@ class ListDriver{
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = strToInt(tokens[2]);
+            if(count < 0){
+                throw ERR_POP_COUNT_UNDERFLOW;
+            }
             if(count > value->len()){
-                throw string("Error: pop count is greater than list size");
+                throw ERR_POP_COUNT_OVERFLOW;
             }
             for(int i = 1; i <= count; i++){
                 value->popLeft();
@@ -96,8 +100,11 @@ class ListDriver{
             db->assertKeyExists(tokens[1]);
             ListDatatype* value = getValue(tokens[1]);
             int count = strToInt(tokens[2]);
+            if(count < 0){
+                throw ERR_POP_COUNT_UNDERFLOW;
+            }
             if(count > value->len()){
-                throw string("Error: pop count is greater than list size");
+                throw ERR_POP_COUNT_OVERFLOW;
             }
             for(int i = 1; i <= count; i++){
                 value->popRight();
