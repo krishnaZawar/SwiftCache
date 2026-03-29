@@ -4,20 +4,16 @@ The ultimate single-threaded in-memory database written from scratch in C++.
 ## How to use
 1. Build the database using
 ```
-# macOS/Linux
-g++ src/main.cpp -o db
-
-# Windows (MinGW)
 g++ src/main.cpp -o db -lws2_32
-
-# Windows (MSVC - Developer Command Prompt)
-cl /EHsc src\main.cpp /Fe:db.exe /link ws2_32.lib
 ```
 2. Start the DB server using
 ```
-./db -p <port number>		# to run on specific port
-./db						# to run on default 8080
+./db -df <.txt file> -di <interval in seconds>	# for persistence
+./db -p <port number>							# to run on specific port
+./db											# to run on default 8080
 ```
+Note: These flags can be combined as and when needed.
+
 ## type interfaces
 ### String
 ```
@@ -60,24 +56,26 @@ PERSIST [<keyname>]+
 The DB works on a single thread to avoid race conditions and locking overheads for increased efficieny. This thread runs the operations, rehashing loop and expiry loop all in one with high performance.
 
 ### Fast Lookups
-The DB performs amortized O(1) lookups to provide low latency.
+The DB performs amortized **O(1) lookups** to provide low latency.
 
 ### Multiple types supported
-The DB supports String, List, Hash datatypes.
+The DB supports **String, List, Hash datatypes**.
 
 ### TTL support
 The DB supports TTL, which allows you to set expiration time for keys, after which the keys are evicted from the DB.
-The eviction is done via an exipry loop that runs incrementally in small batches to not block the thread and still maintain operational speed of amortized O(1).
+The eviction is done via an exipry loop that runs incrementally in small batches to not block the thread and still maintain operational speed of amortized **O(1)**.
 
 ### Rehashing
-The DB performs rehashing to stabilize the load factor and keep the operations capped at an amortized O(1). 
+The DB performs rehashing to stabilize the load factor and keep the operations capped at an amortized **O(1)**. 
 Rehashing is done incrementally in small batches to not block the thread completely and still be able to deliver low latency. The rehashing also takes care of expiration as it blocks the expiry loop during rehashing.
 
 ### Type safety
 A key can only hold one type of data at a time. To change the datatype, the key needs to be removed and inserted again into the DB.
 
+### Persistence
+The **Write-Ahead Log (WAL)** is used to persist the database state. It enables recovery after crashes and prevents data loss during restarts. By default, persistence is disabled for performance reasons, but it can be enabled by providing a `dumpFile` and `dumpInterval` when starting the server.
 ## Future scope of development
-1. Make the DB persist data
-2. I/O multiplexing to serve multiple clients
+1. Add WAL compaction algorithm to keep it from growing boundless.
+2. IO multiplexing to serve multiple clients
 3. Write a driver to make the DB more integrable and easy to use
 4. Eviction mechanism (LRU, LFU, PLRU depending on performance)
