@@ -23,4 +23,18 @@ int strToInt(string str) {
     return num;
 }
 
+bool endsWith(string str, string expected) {
+    if(str.size() < expected.size()) {
+        return false;
+    }
+    int i = expected.size()-1, j = str.size()-1;
+    while(i >= 0) {
+        if(str[j] != expected[i]) {
+            return false;
+        }
+        i--, j--;
+    }
+    return true;
+}
+
 #endif //strUtils

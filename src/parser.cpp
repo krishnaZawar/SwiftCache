@@ -5,6 +5,7 @@
 
 #include "base/const.h"
 #include "drivers/drivers.h"
+#include "WAL/wal.cpp"
 
 #ifndef Parser_class
 #define Parser_class
@@ -15,6 +16,21 @@ using std::unordered_map;
 
 class Parser{
     private:
+        unordered_map<string, int> commandMp;
+
+        vector<string> string_commands;
+        vector<string> generic_commands;
+        vector<string> list_commands;
+        vector<string> hash_commands;
+        
+        StringDriver stringDriver;
+        ListDriver listDriver;
+        GenericsDriver genericsDriver;
+        HashDriver hashDriver;
+
+        WAL *wal;
+        bool captureLogs;
+
         vector<string> tokenize(const char* command, int size){
             vector<string> tokens;
             string cur = "";
@@ -50,20 +66,7 @@ class Parser{
             return tokens;
         }
 
-        unordered_map<string, int> commandMp;
-
-        vector<string> string_commands;
-        vector<string> generic_commands;
-        vector<string> list_commands;
-        vector<string> hash_commands;
-        
-        StringDriver stringDriver;
-        ListDriver listDriver;
-        GenericsDriver genericsDriver;
-        HashDriver hashDriver;
-
-    public:
-        Parser(Database *db) {
+        void Constructor(Database *db) {
             /*
                 These are not used anywhere.
                 The command lists are kept just for reference and will be removed later.
@@ -120,7 +123,26 @@ class Parser{
             hashDriver = HashDriver(db);
         }
 
-        string parseCommand(const char* command, int size){
+    public:
+        Parser(Database *db) {
+            Constructor(db);
+
+            wal = NULL;
+            captureLogs = false;
+        }
+        Parser(Database *db, WAL *wal) {
+            Constructor(db);
+
+            this->wal = wal;
+            this->captureLogs = true;
+        }
+
+        void addWAL(WAL *wal) {
+            this->wal = wal;
+            this->captureLogs = true;
+        }
+
+        string parseCommand(const char* command, int size, bool dbInitialization = false){
             vector<string> tokens = tokenize(command, size);
             if(tokens.size() == 0){
                 return "";
@@ -128,36 +150,74 @@ class Parser{
             if(!commandMp.count(tokens[0])) {
                 throw ERR_NO_COMM;
             }
+            string result = "";
             switch(commandMp[tokens[0]]) {
                 // string commands
-                case COMM_SET: 
-                    return stringDriver.Set(tokens);
+                case COMM_SET:
+                    result = stringDriver.Set(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_GET:
                     return stringDriver.Get(tokens);
 
                 // generic commands
                 case COMM_DEL:
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
                     return genericsDriver.Del(tokens);
                 case COMM_TYPE:
                     return genericsDriver.Type(tokens);
                 case COMM_EXPIRE:
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
                     return genericsDriver.Expire(tokens);
                 case COMM_PERSIST:
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
                     return genericsDriver.Persist(tokens);
 
                 // list commands
                 case COMM_LPUSH:
-                    return listDriver.LPush(tokens);
+                    result = listDriver.LPush(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_RPUSH:
-                    return listDriver.RPush(tokens);
+                    result = listDriver.RPush(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_LPUSHIDX:
-                    return listDriver.LPushIdx(tokens);
+                    result = listDriver.LPushIdx(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_LPOP:
-                    return listDriver.LPop(tokens);
+                    result = listDriver.LPop(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_RPOP:
-                    return listDriver.RPop(tokens);
+                    result = listDriver.RPop(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_LPOPIDX:
-                    return listDriver.LPopIdx(tokens);
+                    result = listDriver.LPopIdx(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_LLEN:
                     return listDriver.LLen(tokens);
                 case COMM_LINDEX:
@@ -167,7 +227,11 @@ class Parser{
 
                 // hash commands
                 case COMM_HSET:
-                    return hashDriver.HSet(tokens);
+                    result = hashDriver.HSet(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_HGET:
                     return hashDriver.HGet(tokens);
                 case COMM_HGETALL:
@@ -175,7 +239,11 @@ class Parser{
                 case COMM_HKEYS:
                     return hashDriver.HKeys(tokens);
                 case COMM_HDEL:
-                    return hashDriver.HDel(tokens);
+                    result = hashDriver.HDel(tokens);
+                    if(captureLogs && !dbInitialization){
+                        wal->appendLog(command);
+                    }
+                    break;
                 case COMM_HEXISTS:
                     return hashDriver.HExists(tokens);
                 case COMM_HLEN:
@@ -183,7 +251,7 @@ class Parser{
                 case COMM_HSTRLEN:
                     return hashDriver.HStrLen(tokens);
             }
-            return "";
+            return result;
         }
 };
 

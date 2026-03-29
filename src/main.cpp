@@ -1,10 +1,14 @@
 #include<iostream>
 #include<string>
-#include<cstring>
+#include<string>
+#include<thread>
+#include<fstream>
 
 #include "parser.cpp"
+#include "WAL/wal.cpp"
 #include "database/database.cpp"
 #include "platform/socket.cpp"
+#include "utils/utils.h"
 
 // #include<ctime>
 
@@ -20,17 +24,57 @@ using std::endl;
 using std::cerr;
 using std::stoi;
 using std::string;
+using std::ifstream;
 
 int main(int argc, char* argv[]){
-    int PORT;
-    if(argc == 1){
-        PORT = 8080;
+    int port = 8080;
+    string dumpFile = "";
+    int dumpInterval = 0;
+
+    if(argc % 2 == 0) {
+        cerr << "Error: Invalid number of CLI arguments passed" << endl;
+        return 1;
     }
-    else if(argc == 3 && string(argv[1]) == "-p"){
-        PORT = stoi(string(argv[2]));
+
+    for(int i = 1; i < argc; i += 2) {
+        if(strcmp(argv[i], "-p") == 0) {
+            try {
+                port = strToInt(argv[i+1]);
+                if(port <= 0) {
+                    throw string("positive integer expected");
+                }
+            } catch(...) {
+                cerr << "Error: Port number should be an integer" << endl;
+                return 1;
+            }
+        } else if(strcmp(argv[i], "-df") == 0) {
+            dumpFile = argv[i+1];
+            if(dumpFile.size() < 4 || !endsWith(dumpFile, ".txt")) {
+                cerr << "Error: Dump file should be a .txt file" << endl;
+                return 1;
+            }
+        } else if(strcmp(argv[i], "-di") == 0) {
+            try {
+                dumpInterval = strToInt(argv[i+1]);
+                if(dumpInterval <= 0) {
+                    throw string("positive integer expected");
+                }
+            } catch(...) {
+                cerr << "Error: Dump interval should be an integer and non-negative" << endl;
+                return 1;
+            }
+        } else {
+            cerr << "Error: Invalid flag passed" << endl;
+            return 1;
+        }
     }
-    else{
-        cerr << "Error: Invalid initialization of DB" << endl;
+
+    if(dumpInterval != 0 && dumpFile == "") {
+        cerr << "Error: Dump File not specified" << endl;
+        return 1;
+    }
+    if(dumpFile != "" && dumpInterval == 0) {
+        cerr << "Error: Specify dump interval" << endl;
         return 1;
     }
 
@@ -48,7 +92,7 @@ int main(int argc, char* argv[]){
 
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT); // Port number
+    serverAddr.sin_port = htons(port); // port number
     serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR_CODE) {
@@ -57,19 +101,36 @@ int main(int argc, char* argv[]){
         cleanupSockets();
         return 1;
     }
-
+    
+    WAL *wal = NULL;
+    if(dumpFile != "") {
+        wal = new WAL(dumpFile, dumpInterval);
+    }
     Database db;
-    Parser parser (&db);
-
+    Parser parser (&db, wal);
+    
+    if (dumpFile != "") {
+        // load WAL into DB
+        ifstream file (dumpFile);
+        if(file) {
+            string walLog;
+            while(getline(file, walLog)){
+                try{
+                    parser.parseCommand(walLog.c_str(), walLog.size(), true);
+                } catch(...) {}
+            }
+        }
+    }
+    
     if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR_CODE) {
         cerr << "Listen failed: " << getSocketError() << endl;
         closeSocket(serverSocket);
         cleanupSockets();
         return 1;
     }
-
-    cout << "Server is listening on port " << PORT << "..." << endl;
-
+    
+    cout << "Server is listening on port " << port << "..." << endl;
+    
     Socket clientSocket = accept(serverSocket, nullptr, nullptr);
     if (clientSocket == INVALID_SOCKET_FD) {
         cerr << "Accept failed: " << getSocketError() << endl;
@@ -113,6 +174,10 @@ int main(int argc, char* argv[]){
     cleanupSockets();
 
     db.printDetails();
+
+    if(wal) {
+        delete wal;
+    }
 
     return 0;
 }
