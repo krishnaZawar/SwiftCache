@@ -11,6 +11,7 @@
 
 using std::string;
 using std::vector;
+using std::move;
 using std::mutex;
 using std::ofstream;
 using std::atomic;
@@ -24,39 +25,35 @@ class WAL {
 
         mutex mu;
         vector<string> logs;
-        vector<string> buffer;
 
-        atomic<bool> isDumping;
+        uint64_t logCount;
+
         int dumpInterval;
         string dumpFile;
         thread dumpWorker;
 
     public:
-        WAL(string dumpFile, int dumpInterval) {
+        WAL(string dumpFile, int dumpInterval, int logCount) {
             this->dumpFile = dumpFile;
             this->dumpInterval = dumpInterval;
-
+            this->logCount = logCount;
+            
             isRunning = true;
             dumpWorker = thread(&WAL::Run, this);
         }
 
         void appendLog(string log) {
             mu.lock();
-            if(isDumping){
-                buffer.push_back(log);
-            } else {
-                logs.push_back(log);
-            }
+            logs.push_back(log);
             mu.unlock();
         }
 
         void dumpLogs() {
             /*
                 Dump algorithm:
-                    1. Dump the buffer logs first
-                    2. Go to dump state
-                    3. Dump the main logs
-                    4. Come out of dump state
+                    1. Swap the data from logs to localLogs
+                    2. Free the logs
+                    3. dump local logs
             */
 
             ofstream file (dumpFile, std::ios::app);
@@ -64,23 +61,17 @@ class WAL {
                 throw string("Error: could not open WAL file");
             }
 
-            // dump buffer
-            for (auto &log : buffer) {
+            vector<string> localLogs;
+
+            mu.lock();
+            localLogs = move(logs);
+            mu.unlock();
+
+            for(auto &log : localLogs) {
                 file << log << "\n";
             }
-            buffer = {};
-
-            // go to dump state
-            isDumping = true;
-
-            // dump main logs
-            for (auto &log : logs) {
-                file << log << "\n";
-            }
-            logs = {};
-
-            // come out of dump state
-            isDumping = false;
+            logCount += localLogs.size();
+            localLogs.clear();
 
             file.close();
         }

@@ -103,11 +103,10 @@ int main(int argc, char* argv[]){
     }
     
     WAL *wal = NULL;
-    if(dumpFile != "") {
-        wal = new WAL(dumpFile, dumpInterval);
-    }
     Database db;
-    Parser parser (&db, wal);
+    Parser parser (&db);
+
+    u_int64 logCount = 0;
     
     if (dumpFile != "") {
         // load WAL into DB
@@ -117,9 +116,12 @@ int main(int argc, char* argv[]){
             while(getline(file, walLog)){
                 try{
                     parser.parseCommand(walLog.c_str(), walLog.size(), true);
+                    logCount++;
                 } catch(...) {}
             }
         }
+        wal = new WAL(dumpFile, dumpInterval, logCount);
+        parser.addWAL(wal);
     }
     
     if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR_CODE) {

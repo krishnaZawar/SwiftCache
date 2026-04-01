@@ -53,6 +53,9 @@ class Database{
         }
 
         void checkForRehash(){
+            if(underRehash) {
+                return;
+            }
             float loadFactor = getLoadFactor();
             if(loadFactor >= loadFactorToScaleUp){
                 if(primaryDbSize < maxTableSize){

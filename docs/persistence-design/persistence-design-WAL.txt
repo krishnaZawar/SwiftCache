@@ -34,3 +34,6 @@ Implementation:
 
 Note:
     This might not be the best implementation, but it helps us work around the issue of OS level optimizations and reduce the load of implementing OS level abstractions of COW for efficient snapshotting, which is still the best solution.
+
+WAL Compaction trigger:
+    Compaction should be triggered when the number of logs in the WAL exceed the DB by twice.
