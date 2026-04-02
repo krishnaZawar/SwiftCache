@@ -4,7 +4,9 @@
 #include<iostream>
 
 #include "../models/models.h"
+#include "../base/errors.h"
 #include "../base/const.h"
+#include "../WAL/wal.cpp"
 
 #ifndef Database_class
 #define Database_class
@@ -22,19 +24,29 @@ class Database{
         const float loadFactorToScaleDown = 0.25;
         const int rehashBatchSize = 10;
         const int expiryBatchSize = 10;
+        const int compactionBatchSize = 10;
 
         vector<vector<Object*>> primaryDb;
         vector<vector<Object*>> rehashDb;
-
-    private:
+        
+        private:
         int primaryDbIdxForExpiry;
-
+        
         float keysPresent;
         int primaryDbSize;
-
+        
         int primaryDbIdxForRehash;
         int rehashDbSize;
         bool underRehash;
+
+        WAL *wal;
+        bool walActive;
+        int compactionRowPrimary;
+        int compactionRowRehash;
+
+        inline bool underCompaction() {
+            return walActive && wal->isUnderCompaction();
+        }
         
         // Computes a hash value for a given string key to be used as an index in a hash table of size tableSize.
         inline int getHash(string key, int tableSize){
@@ -53,7 +65,8 @@ class Database{
         }
 
         void checkForRehash(){
-            if(underRehash) {
+            // do not perform checks for rehash if already under rehash or compaction for stability and loss prevention
+            if(underRehash || underCompaction()) {
                 return;
             }
             float loadFactor = getLoadFactor();
@@ -80,6 +93,10 @@ class Database{
         */
         void Rehash(){
             if(primaryDbIdxForRehash == primaryDbSize){
+                // do not complete rehash if under compaction to prevent loss of keys
+                if(underCompaction()) {
+                    return;
+                }
                 underRehash = false;
                 primaryDb = rehashDb;
                 primaryDbSize = rehashDbSize;
@@ -142,7 +159,40 @@ class Database{
             }
             primaryDbIdxForExpiry = expireIdx;
         }
-        
+    
+    private:
+        void WALCompaction() {
+            if(!underCompaction()){
+                return;
+            }
+            if(compactionRowPrimary == primaryDb.size() && compactionRowRehash == rehashDb.size()) {
+                wal->startCompactionLogDump();
+                compactionRowPrimary = compactionRowRehash = 0;
+                return;
+            }
+            int batchesLeft = compactionBatchSize;
+            vector<string> commands;
+            while(batchesLeft && (compactionRowPrimary < primaryDb.size() || compactionRowRehash < rehashDb.size())) {
+                if(compactionRowPrimary < primaryDb.size()) {
+                    for(auto &obj : primaryDb[compactionRowPrimary]) {
+                        commands = obj->buildCommands();
+                        for(auto &command: commands) {
+                            wal->appendCompactionLog(command);
+                        }
+                    }
+                    compactionRowPrimary++;
+                } else {
+                    for(auto &obj : rehashDb[compactionRowRehash]) {
+                        commands = obj->buildCommands();
+                        for(auto &command: commands) {
+                            wal->appendCompactionLog(command);
+                        }
+                    }
+                    compactionRowRehash++;
+                }
+                batchesLeft--;
+            }
+        }
 
     private:
         bool keyExistsHelper(string key, vector<vector<Object*>> &db, int dbSize){
@@ -228,6 +278,11 @@ class Database{
             underRehash = false;
             primaryDbIdxForExpiry = 0;
             primaryDb = vector<vector<Object*>> (primaryDbSize);
+
+            wal = NULL;
+            walActive = false;
+            compactionRowPrimary = 0;
+            compactionRowRehash = 0;
         }
 
         inline bool keyExists(string key){
@@ -244,6 +299,7 @@ class Database{
         }
 
         void deleteKey(string key){
+            WALCompaction();
             assertKeyExists(key);
             bool deleted = deleteKeyHelper(key, primaryDb, primaryDbSize);
             if(underRehash){
@@ -261,6 +317,7 @@ class Database{
         }
 
         string getType(string key){
+            WALCompaction();
             assertKeyExists(key);
             char _type = getTypeHelper(key, primaryDb, primaryDbSize);
             if(underRehash){
@@ -271,13 +328,13 @@ class Database{
             }
             string type = "";
             switch(_type){
-                case 's':
+                case STRING_DATATYPE:
                     type = "String";
                     break;
-                case 'l':
+                case LIST_DATATYPE:
                     type = "List";
                     break;
-                case 'h':
+                case HASH_DATATYPE:
                     type = "Hash";
                     break;
             }
@@ -285,6 +342,7 @@ class Database{
         }
 
         Object* getObject(string key){
+            WALCompaction();
             Object* obj = getObjectHelper(key, primaryDb, primaryDbSize);
             if(underRehash){
                 if(!obj){
@@ -295,6 +353,7 @@ class Database{
             return obj;
         }
         void insertObject(Object* obj){
+            WALCompaction();
             if(!underRehash){
                 insertObjectHelper(obj, primaryDb, primaryDbSize);
             }
@@ -308,6 +367,11 @@ class Database{
             if(!underRehash){
                 checkForRehash();
             }
+        }
+
+        void addWAL(WAL *wal) {
+            this->wal = wal;
+            walActive = true;
         }
 
         void printDetails(){

@@ -1,6 +1,6 @@
 #include<string>
 
-#include "../base/const.h"
+#include "../base/errors.h"
 
 #ifndef strUtils
 #define strUtils

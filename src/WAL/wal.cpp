@@ -5,6 +5,9 @@
 #include<atomic>
 #include<thread>
 #include<chrono>
+#include<filesystem>
+#include<condition_variable>
+#include<iostream>
 
 #ifndef WAL_class
 #define WAL_class
@@ -12,48 +15,46 @@
 using std::string;
 using std::vector;
 using std::move;
+using std::filesystem::rename;
+using std::filesystem::remove;
 using std::mutex;
+using std::unique_lock;
+using std::condition_variable;
 using std::ofstream;
 using std::atomic;
 using std::thread;
 using std::this_thread::sleep_for;
 using std::chrono::seconds;
+using std::cout;
+using std::endl;
 
 class WAL {
     private:
         atomic<bool> isRunning;
+        atomic<bool> underCompaction;
+        atomic<bool> startCompactionDumpFlag;
 
         mutex mu;
         vector<string> logs;
 
-        uint64_t logCount;
+        condition_variable cv;
+        mutex compactionMu;
+        vector<string> compactionLogs;
+        vector<string> buffer;
 
         int dumpInterval;
         string dumpFile;
         thread dumpWorker;
 
-    public:
-        WAL(string dumpFile, int dumpInterval, int logCount) {
-            this->dumpFile = dumpFile;
-            this->dumpInterval = dumpInterval;
-            this->logCount = logCount;
-            
-            isRunning = true;
-            dumpWorker = thread(&WAL::Run, this);
-        }
-
-        void appendLog(string log) {
-            mu.lock();
-            logs.push_back(log);
-            mu.unlock();
-        }
+        int compactionInterval;
+        string compactionDumpFile;
+        thread compactionLogDumpWorker;
 
         void dumpLogs() {
             /*
                 Dump algorithm:
-                    1. Swap the data from logs to localLogs
-                    2. Free the logs
-                    3. dump local logs
+                    1. Dump buffer
+                    3. Dump local logs
             */
 
             ofstream file (dumpFile, std::ios::app);
@@ -63,6 +64,14 @@ class WAL {
 
             vector<string> localLogs;
 
+            compactionMu.lock();
+            localLogs = move(buffer);
+            compactionMu.unlock();
+            for(auto &log : localLogs) {
+                file << log << "\n";
+            }
+            localLogs.clear();
+
             mu.lock();
             localLogs = move(logs);
             mu.unlock();
@@ -70,12 +79,10 @@ class WAL {
             for(auto &log : localLogs) {
                 file << log << "\n";
             }
-            logCount += localLogs.size();
             localLogs.clear();
 
             file.close();
         }
-
         void Run() {
             while(isRunning) {
                 sleep_for(seconds(dumpInterval));
@@ -83,10 +90,117 @@ class WAL {
             }
         }
 
+        void dumpCompactionLogs() {
+            /*
+                Dump algorithm:
+                    1. Dump compaction logs
+                    2. atomically rename file
+                    3. delete temp file
+            */
+
+            ofstream file (compactionDumpFile, std::ios::app);
+            if(!file) {
+                throw string("Error: could not open WAL file");
+            }
+
+            vector<string> localLogs;
+
+            compactionMu.lock();
+            localLogs = move(compactionLogs);
+            compactionMu.unlock();
+
+            for(auto &log : localLogs) {
+                file << log << "\n";
+            }
+            localLogs.clear();
+
+            file.close();
+            
+            try {
+                rename(compactionDumpFile, dumpFile);
+            } catch(...) {}
+            remove(compactionDumpFile);
+        }
+        void RunCompactionThread() {
+            while(isRunning) {
+                sleep_for(seconds(compactionInterval));
+                std::cout << "start compaction" << std::endl;
+                underCompaction = true;
+                unique_lock<mutex> lock(mu);
+                cv.wait(lock, [&]{ return startCompactionDumpFlag.load() || !isRunning.load(); });
+                if (!isRunning) break;
+                
+                underCompaction = false;
+
+                lock.unlock();  // release lock while dumping
+                
+                std::cout << "start dump" << std::endl;
+                dumpCompactionLogs();
+
+                startCompactionDumpFlag = false;
+            }
+        }
+
+        inline void appendLogToBuffer(string log) {
+            compactionMu.lock();
+            buffer.push_back(log);
+            compactionMu.unlock();
+        }
+
+    public:
+        WAL(string dumpFile, int dumpInterval, int compactionInterval) {
+            this->dumpFile = dumpFile;
+            this->dumpInterval = dumpInterval;
+            this->compactionInterval = compactionInterval;
+
+            compactionDumpFile = dumpFile.substr(0, dumpFile.size()-4) + "_compact.txt";
+            
+            underCompaction = false;
+            startCompactionDumpFlag = false;
+
+            isRunning = true;
+            dumpWorker = thread(&WAL::Run, this);
+            compactionLogDumpWorker = thread(&WAL::RunCompactionThread, this);
+        }
+
+        inline void appendLog(string log) {
+            mu.lock();
+            logs.push_back(log);
+            mu.unlock();
+
+            if(underCompaction) {
+                appendLogToBuffer(log);
+            }
+        }
+
+        inline void startCompactionLogDump() {
+            startCompactionDumpFlag = true;
+            cv.notify_one();    // notify the wait() for completion
+        }
+
+        inline bool isUnderCompaction() {
+            return underCompaction;
+        }
+
+        inline void appendCompactionLog(string log) {
+            compactionMu.lock();
+            compactionLogs.push_back(log);
+            compactionMu.unlock();
+        }
+
         ~WAL() {
+            // stop running and notify_all threads
             isRunning = false;
+            cv.notify_all();
             if(dumpWorker.joinable()){
                 dumpWorker.join();
+                std::cout << "closed main dump worker" << std::endl;
+            }
+            // force stop compaction for server shutdown
+            underCompaction = false;
+            if(compactionLogDumpWorker.joinable()){
+                compactionLogDumpWorker.join();
+                std::cout << "closed compaction dump worker" << std::endl;
             }
         }
 };

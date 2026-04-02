@@ -72,6 +72,14 @@ class ListDatatype{
             assertIdxBounds(idx);
             return list[idx];
         }
+
+        string buildCommand(string key) {
+            string command = "RPUSH "+key;
+            for(auto &item: list){
+                command += " " + item;
+            }
+            return command;
+        }
 };
 
 #endif // ListDatatype_class

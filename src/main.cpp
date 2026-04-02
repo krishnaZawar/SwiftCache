@@ -30,6 +30,8 @@ int main(int argc, char* argv[]){
     int port = 8080;
     string dumpFile = "";
     int dumpInterval = 0;
+    // compaction interval is by default 5 * dumpInterval if not specified
+    int compactionInterval = 0;
 
     if(argc % 2 == 0) {
         cerr << "Error: Invalid number of CLI arguments passed" << endl;
@@ -61,6 +63,16 @@ int main(int argc, char* argv[]){
                 }
             } catch(...) {
                 cerr << "Error: Dump interval should be an integer and non-negative" << endl;
+                return 1;
+            }
+        } else if(strcmp(argv[i], "-ci") == 0) {
+            try {
+                compactionInterval = strToInt(argv[i+1]);
+                if(compactionInterval <= 0) {
+                    throw string("positive integer expected");
+                }
+            } catch(...) {
+                cerr << "Error: Compaction interval should be an integer and non-negative" << endl;
                 return 1;
             }
         } else {
@@ -120,8 +132,12 @@ int main(int argc, char* argv[]){
                 } catch(...) {}
             }
         }
-        wal = new WAL(dumpFile, dumpInterval, logCount);
+        if(compactionInterval == 0) {
+            compactionInterval = 5 * dumpInterval;
+        }
+        wal = new WAL(dumpFile, dumpInterval, compactionInterval);
         parser.addWAL(wal);
+        db.addWAL(wal);
     }
     
     if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR_CODE) {

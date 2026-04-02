@@ -1,12 +1,15 @@
 #include<string>
 #include<ctime>
+#include<vector>
 
 #include "value.cpp"
+#include "../base/const.h"
 
 #ifndef Object_class
 #define Object_class
 
 using std::string;
+using std::to_string;
 using std::time_t;
 using std::time;
 
@@ -14,6 +17,7 @@ class Object{
     private:
         string key;
         Value* value;
+        int expireSeconds;
         time_t expiresAt;
     public:
         Object() {}
@@ -21,9 +25,11 @@ class Object{
             key = _key;
             value = val;
             expiresAt = 0;
+            expireSeconds = 0;
         }
 
         inline void setTTL(int seconds){
+            expireSeconds = seconds;
             expiresAt = time(NULL) + seconds;
         }
         inline void clearTTL(){
@@ -47,6 +53,26 @@ class Object{
 
         inline void updateValue(void* val){
             value->updateValue(val);
+        }
+
+        vector<string> buildCommands() {
+            vector<string> commands;
+            string command = "";
+            switch(getType()) {
+                case STRING_DATATYPE:
+                    command = "SET "+key+" "+*((string*)getValue());
+                    break;
+                case LIST_DATATYPE:
+                    command = ((ListDatatype*)value->getValue())->buildCommand(key);
+                    break;
+                case HASH_DATATYPE:
+                    command = ((HashDatatype*)value->getValue())->buildCommand(key);
+            }
+            commands.push_back(command);
+            if(expireSeconds != 0) {
+                commands.push_back("EXPIRE "+key+" "+to_string(expireSeconds));
+            }
+            return commands;
         }
 
         ~Object(){

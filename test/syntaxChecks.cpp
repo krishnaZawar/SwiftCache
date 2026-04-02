@@ -1,5 +1,5 @@
 #include "test_utils.h"
-#include "../src/base/const.h"
+#include "../src/base/errors.h"
 
 void syntaxCheck_stringCommands() {
     Database db;

@@ -2,6 +2,7 @@
 #include<string>
 
 #include "datatypes/datatypes.h"
+#include "../base/const.h"
 
 #ifndef Value_class
 #define Value_class
@@ -19,17 +20,27 @@ class Value{
             if(_type != 's' && _type != 'l' && _type != 'h'){
                 throw std::string("Error: Invalid type setting");
             }
+            switch(_type) {
+                case STRING_DATATYPE:
+                case LIST_DATATYPE:
+                case HASH_DATATYPE:
+                    break;
+                default:
+                    throw std::string("Error: Invalid type setting");
+            }
         }
 
         inline void deleteValue(){
-            if(type == 's'){
-                delete (string*)value;
-            }
-            else if(type == 'l'){
-                delete (ListDatatype*)value;
-            }
-            else if(type == 'h'){
-                delete (HashDatatype*)value;
+            switch(type) {
+                case STRING_DATATYPE:
+                    delete (string*)value;
+                    break;
+                case LIST_DATATYPE:
+                    delete (ListDatatype*)value;
+                    break;
+                case HASH_DATATYPE:
+                    delete (HashDatatype*)value;
+                    break;
             }
         }
     public:

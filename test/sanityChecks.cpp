@@ -2,7 +2,7 @@
 #include<chrono>
 
 #include "test_utils.h"
-#include "../src/base/const.h"
+#include "../src/base/errors.h"
 
 using std::this_thread::sleep_for;
 using std::chrono::seconds;

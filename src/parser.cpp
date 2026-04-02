@@ -3,7 +3,7 @@
 #include<iostream>
 #include<unordered_map>
 
-#include "base/const.h"
+#include "base/errors.h"
 #include "drivers/drivers.h"
 #include "WAL/wal.cpp"
 

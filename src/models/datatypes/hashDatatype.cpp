@@ -64,6 +64,14 @@ class HashDatatype{
             assertFieldExists(field);
             return hash[field].size();
         }
+
+        string buildCommand(string key) {
+            string command = "HSET "+key;
+            for(auto &[field, val]: hash) {
+                command += " " + field + " " + val;
+            }
+            return command;
+        }
 };
 
 #endif // hashDatatype_class
