@@ -5,7 +5,7 @@
 #include<atomic>
 #include<thread>
 #include<chrono>
-#include<filesystem>
+#include<cstdio>
 #include<condition_variable>
 #include<iostream>
 
@@ -40,7 +40,6 @@ class WAL {
         condition_variable cv;
         mutex compactionMu;
         vector<string> compactionLogs;
-        vector<string> buffer;
 
         int dumpInterval;
         string dumpFile;
@@ -53,8 +52,7 @@ class WAL {
         void dumpLogs() {
             /*
                 Dump algorithm:
-                    1. Dump buffer
-                    3. Dump local logs
+                    1. Dump local logs
             */
 
             ofstream file (dumpFile, std::ios::app);
@@ -63,14 +61,6 @@ class WAL {
             }
 
             vector<string> localLogs;
-
-            compactionMu.lock();
-            localLogs = move(buffer);
-            compactionMu.unlock();
-            for(auto &log : localLogs) {
-                file << log << "\n";
-            }
-            localLogs.clear();
 
             mu.lock();
             localLogs = move(logs);
@@ -141,11 +131,7 @@ class WAL {
             }
         }
 
-        inline void appendLogToBuffer(string log) {
-            compactionMu.lock();
-            buffer.push_back(log);
-            compactionMu.unlock();
-        }
+
 
     public:
         WAL(string dumpFile, int dumpInterval, int compactionInterval) {
@@ -164,12 +150,12 @@ class WAL {
         }
 
         inline void appendLog(string log) {
-            mu.lock();
-            logs.push_back(log);
-            mu.unlock();
-
             if(underCompaction) {
-                appendLogToBuffer(log);
+                appendCompactionLog(log);
+            } else {
+                mu.lock();
+                logs.push_back(log);
+                mu.unlock();
             }
         }
 
