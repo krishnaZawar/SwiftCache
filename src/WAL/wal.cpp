@@ -5,6 +5,12 @@
 #include<atomic>
 #include<thread>
 #include<chrono>
+#if __has_include(<filesystem>) && __cplusplus >= 201703L
+#include<filesystem>
+#define OS_WINDOWS 1
+#else
+#define OS_WINDOWS 0
+#endif
 #include<cstdio>
 #include<condition_variable>
 #include<iostream>
@@ -15,8 +21,6 @@
 using std::string;
 using std::vector;
 using std::move;
-using std::filesystem::rename;
-using std::filesystem::remove;
 using std::mutex;
 using std::unique_lock;
 using std::condition_variable;
@@ -107,9 +111,14 @@ class WAL {
             file.close();
             
             try {
-                rename(compactionDumpFile, dumpFile);
+#if OS_WINDOWS
+                std::filesystem::rename(compactionDumpFile, dumpFile);
+                std::filesystem::remove(compactionDumpFile);
+#else
+                std::rename(compactionDumpFile.c_str(), dumpFile.c_str());
+                std::remove(compactionDumpFile.c_str());
+#endif
             } catch(...) {}
-            remove(compactionDumpFile);
         }
         void RunCompactionThread() {
             while(isRunning) {

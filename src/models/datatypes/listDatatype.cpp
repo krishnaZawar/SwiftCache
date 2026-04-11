@@ -1,6 +1,7 @@
 #include<string>
 #include<deque>
 #include<vector>
+#include "../../base/errors.h"
 
 #ifndef ListDatatype_class
 #define ListDatatype_class
@@ -78,11 +79,10 @@ class ListDatatype{
         vector<string> buildCommands(string key) {
             vector<string> commands;
             commands.push_back("DEL " + key);
-            string rpushCommand = "RPUSH " + key;
+            commands.push_back("RPUSH " + key);
             for(auto &item: list){
-                rpushCommand += " " + item;
+                commands.back() += " " + item;
             }
-            commands.push_back(rpushCommand);
             return commands;
         }
 };
