@@ -159,12 +159,12 @@ class WAL {
         }
 
         inline void appendLog(string log) {
+            mu.lock();
+            logs.push_back(log);
+            mu.unlock();
+
             if(underCompaction) {
                 appendCompactionLog(log);
-            } else {
-                mu.lock();
-                logs.push_back(log);
-                mu.unlock();
             }
         }
 
