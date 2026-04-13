@@ -5,7 +5,13 @@
 #include<atomic>
 #include<thread>
 #include<chrono>
+#if __has_include(<filesystem>) && __cplusplus >= 201703L
 #include<filesystem>
+#define OS_WINDOWS 1
+#else
+#define OS_WINDOWS 0
+#endif
+#include<cstdio>
 #include<condition_variable>
 #include<iostream>
 
@@ -15,8 +21,6 @@
 using std::string;
 using std::vector;
 using std::move;
-using std::filesystem::rename;
-using std::filesystem::remove;
 using std::mutex;
 using std::unique_lock;
 using std::condition_variable;
@@ -40,7 +44,6 @@ class WAL {
         condition_variable cv;
         mutex compactionMu;
         vector<string> compactionLogs;
-        vector<string> buffer;
 
         int dumpInterval;
         string dumpFile;
@@ -53,8 +56,7 @@ class WAL {
         void dumpLogs() {
             /*
                 Dump algorithm:
-                    1. Dump buffer
-                    3. Dump local logs
+                    1. Dump local logs
             */
 
             ofstream file (dumpFile, std::ios::app);
@@ -63,14 +65,6 @@ class WAL {
             }
 
             vector<string> localLogs;
-
-            compactionMu.lock();
-            localLogs = move(buffer);
-            compactionMu.unlock();
-            for(auto &log : localLogs) {
-                file << log << "\n";
-            }
-            localLogs.clear();
 
             mu.lock();
             localLogs = move(logs);
@@ -117,9 +111,16 @@ class WAL {
             file.close();
             
             try {
-                rename(compactionDumpFile, dumpFile);
-            } catch(...) {}
-            remove(compactionDumpFile);
+#if OS_WINDOWS
+                std::filesystem::rename(compactionDumpFile, dumpFile);
+                std::filesystem::remove(compactionDumpFile);
+#else
+                std::rename(compactionDumpFile.c_str(), dumpFile.c_str());
+                std::remove(compactionDumpFile.c_str());
+#endif
+            } catch(...) {
+                std::remove(compactionDumpFile.c_str());
+            }
         }
         void RunCompactionThread() {
             while(isRunning) {
@@ -141,11 +142,7 @@ class WAL {
             }
         }
 
-        inline void appendLogToBuffer(string log) {
-            compactionMu.lock();
-            buffer.push_back(log);
-            compactionMu.unlock();
-        }
+
 
     public:
         WAL(string dumpFile, int dumpInterval, int compactionInterval) {
@@ -169,7 +166,7 @@ class WAL {
             mu.unlock();
 
             if(underCompaction) {
-                appendLogToBuffer(log);
+                appendCompactionLog(log);
             }
         }
 

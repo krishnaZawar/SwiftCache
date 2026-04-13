@@ -1,11 +1,14 @@
 #include<string>
 #include<deque>
+#include<vector>
+#include "../../base/errors.h"
 
 #ifndef ListDatatype_class
 #define ListDatatype_class
 
 using std::string;
 using std::deque;
+using std::vector;
 
 class ListDatatype{
     private:
@@ -73,12 +76,14 @@ class ListDatatype{
             return list[idx];
         }
 
-        string buildCommand(string key) {
-            string command = "RPUSH "+key;
+        vector<string> buildCommands(string key) {
+            vector<string> commands;
+            commands.push_back("DEL " + key);
+            commands.push_back("RPUSH " + key);
             for(auto &item: list){
-                command += " " + item;
+                commands.back() += " " + item;
             }
-            return command;
+            return commands;
         }
 };
 

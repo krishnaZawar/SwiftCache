@@ -57,18 +57,17 @@ class Object{
 
         vector<string> buildCommands() {
             vector<string> commands;
-            string command = "";
             switch(getType()) {
                 case STRING_DATATYPE:
-                    command = "SET "+key+" "+*((string*)getValue());
+                    commands.push_back("SET "+key+" "+*((string*)getValue()));
                     break;
                 case LIST_DATATYPE:
-                    command = ((ListDatatype*)value->getValue())->buildCommand(key);
+                    commands = ((ListDatatype*)value->getValue())->buildCommands(key);
                     break;
                 case HASH_DATATYPE:
-                    command = ((HashDatatype*)value->getValue())->buildCommand(key);
+                    commands.push_back(((HashDatatype*)value->getValue())->buildCommand(key));
+                    break;
             }
-            commands.push_back(command);
             if(expireSeconds != 0) {
                 commands.push_back("EXPIRE "+key+" "+to_string(expireSeconds));
             }

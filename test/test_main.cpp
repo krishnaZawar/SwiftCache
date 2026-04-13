@@ -1,10 +1,18 @@
+#ifdef _WIN32
 #include<windows.h>
+#else
+#include<clocale>
+#endif
 
 #include "syntaxChecks.cpp"
 #include "sanityChecks.cpp"
 
 int main() {
+#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
+#else
+    std::setlocale(LC_ALL, "en_US.UTF-8");
+#endif
 
     cout << "Initializing tester..." << endl;
     cout << "Loading tests..." << endl << endl;
@@ -28,6 +36,9 @@ int main() {
     cout << endl;
     
     sanityCheck_genericFlows();
+    cout << endl;
+
+    sanityCheck_walPersistence();
     cout << endl;
 
     return 0;
