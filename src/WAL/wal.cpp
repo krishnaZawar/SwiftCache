@@ -118,7 +118,9 @@ class WAL {
                 std::rename(compactionDumpFile.c_str(), dumpFile.c_str());
                 std::remove(compactionDumpFile.c_str());
 #endif
-            } catch(...) {}
+            } catch(...) {
+                std::remove(compactionDumpFile.c_str());
+            }
         }
         void RunCompactionThread() {
             while(isRunning) {
