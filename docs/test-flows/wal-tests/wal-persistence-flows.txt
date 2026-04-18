@@ -1,0 +1,21 @@
+WAL persistence test flows (reduced set)
+
+Scenario P1: mixed replay core (String + List + Hash)
+    flow 1. SET(user:1, Alice) -> SET(user:1, Alicia) -> GET(user:1) -> Alicia
+    flow 2. RPUSH(queue, jobs-1, jobs-2) -> LPUSH(queue, jobs-0) -> LRANGE(queue, 0, 2) -> jobs-0 jobs-1 jobs-2
+    flow 3. HSET(profile, city, delhi, role, engineer) -> HGET(profile, city, role) -> delhi engineer
+
+Scenario P2: TTL and PERSIST replay behavior
+    flow 4. SET(session, token123) -> EXPIRE(session, 1) -> immediate GET(session) -> token123
+    flow 5. SET(session, token123) -> EXPIRE(session, 1) -> wait 2s -> GET(session) -> key not found
+    flow 6. SET(account, premium) -> EXPIRE(account, 1) -> PERSIST(account) -> wait 2s -> GET(account) -> premium
+
+Scenario P3: multi-restart WAL growth
+    flow 7. staged append/replay -> GET(cart:status) -> checked_out
+    flow 8. staged append/replay -> LRANGE(cart:items, 0, 1) -> final1 final2
+    flow 9. staged append/replay -> HGET(cart:meta, owner, state) -> user2 ready
+
+Scenario P4: compact long mixed replay
+    flow 10. mixed list operations -> LLEN(long:list) -> 5
+    flow 11. mixed key rebuild -> TYPE(long:s1, long:list, long:hash) -> String List Hash
+    flow 12. mixed hash mutations -> HEXISTS(long:hash, f0, f1, f3) -> 101

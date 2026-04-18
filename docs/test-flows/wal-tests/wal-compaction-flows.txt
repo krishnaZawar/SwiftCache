@@ -1,0 +1,21 @@
+WAL compaction test flows (reduced set)
+
+Scenario C1: active compaction snapshot correctness
+    flow 13. live WAL + heartbeat operations -> observe one compaction cycle completion
+    flow 14. compacted WAL shape check -> contains latest compact:s and excludes deleted compact:tmp
+    flow 15. replay compacted WAL -> GET(compact:s) -> final
+
+Scenario C2: temp compaction file cleanup
+    flow 16. live WAL + heartbeat operations -> observe one compaction cycle completion
+    flow 17. after WAL shutdown -> temp compact file (<dump>_compact.txt) should not exist
+
+Scenario C3: multi-cycle compaction convergence
+    flow 18. execute pre-mutation and post-mutation phases -> two compaction cycles observed
+    flow 19. final compacted WAL includes latest value (v2) and excludes stale value (v1)
+
+Scenario C4: replay integrity after compaction
+    flow 20. replay compacted WAL -> TYPE(ri:s, ri:l, ri:h) -> String List Hash
+
+Notes:
+    - Compaction tests are active integration tests. They instantiate WAL(dumpInterval=1, compactionInterval=1), write through Parser+Database, wait for compaction transitions, and then validate replay from resulting WAL files.
+    - Transient console logs like "start compaction" and "start dump" are expected during these scenarios.
