@@ -10,11 +10,8 @@
 
 using std::this_thread::sleep_for;
 using std::chrono::seconds;
-using std::ofstream;
-using std::ifstream;
 using std::getline;
 using std::deque;
-using std::mt19937;
 using std::uniform_int_distribution;
 
 void sanityCheck_stringCommands() {
@@ -514,3 +511,4 @@ void sanityCheck_genericFlows() {
     command = "GET k";
     AssertEqual("flow 38", executeCommand(parser, command), ERR_TYPE_MISMATCH + "\nError fetching k");
 }
+
