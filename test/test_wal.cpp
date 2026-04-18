@@ -393,6 +393,88 @@ namespace {
 		std::remove(walFile.c_str());
 		std::remove(compactionWalFile.c_str());
 	}
+
+	void runScenarioBasicLoadingLegacyCoverage() {
+		string command;
+
+		const string walFile1 = "test/wal_persistence_test_dump_16.txt";
+		writeWal(walFile1, {
+			"SET persistedKey oldValue",
+			"SET persistedKey persistedValue",
+			"DEL persistedList",
+			"RPUSH persistedList 1 2 3",
+			"LPUSH persistedList 0",
+			"HSET persistedHash field1 value1 field2 value2",
+			"INVALIDCMD should be ignored",
+			"SET postErrorKey stillLoaded"
+		});
+
+		Database db1;
+		Parser parser1(&db1);
+		replayWal(walFile1, parser1);
+
+		command = "GET persistedKey";
+		AssertEqual("WAL flow 21", executeCommand(parser1, command), "persistedValue");
+
+		std::remove(walFile1.c_str());
+
+		const string walFile2 = "test/wal_persistence_test_dump_17.txt";
+		writeWal(walFile2, {
+			"DEL compactedList",
+			"RPUSH compactedList a b c",
+			"DEL compactedList",
+			"RPUSH compactedList a b c",
+			"LPUSH compactedList z"
+		});
+
+		Database db2;
+		Parser parser2(&db2);
+		replayWal(walFile2, parser2);
+
+		command = "LRANGE compactedList 0 3";
+		AssertEqual("WAL flow 22", executeCommand(parser2, command), "z\na\nb\nc");
+
+		std::remove(walFile2.c_str());
+
+		const string walFile3 = "test/wal_persistence_test_dump_18.txt";
+		writeWal(walFile3, {
+			"SET stableKey stableValue",
+			"SET broken \"missing quote",
+			"SET afterMalformed stillWorks",
+			"DEL quotedList",
+			"RPUSH quotedList \"hello world\" \"swift cache\""
+		});
+
+		Database db3;
+		Parser parser3(&db3);
+		replayWal(walFile3, parser3);
+
+		command = "GET afterMalformed";
+		AssertEqual("WAL flow 23", executeCommand(parser3, command), "stillWorks");
+
+		std::remove(walFile3.c_str());
+
+		const string walFile4 = "test/wal_persistence_test_dump_19.txt";
+		writeWal(walFile4, {
+			"DEL rebuildList",
+			"DEL rebuildList",
+			"RPUSH rebuildList 10 20",
+			"DEL rebuildList",
+			"RPUSH rebuildList 30 40 50",
+			"HSET rebuildHash f1 v1",
+			"DEL rebuildHash",
+			"HSET rebuildHash f2 v2"
+		});
+
+		Database db4;
+		Parser parser4(&db4);
+		replayWal(walFile4, parser4);
+
+		command = "HEXISTS rebuildHash f1 f2";
+		AssertEqual("WAL flow 24", executeCommand(parser4, command), "01");
+
+		std::remove(walFile4.c_str());
+	}
 }
 
 void sanityCheck_walPersistence() {
@@ -405,4 +487,5 @@ void sanityCheck_walPersistence() {
 	runScenarioCompactionTempFileCleanup();
 	runScenarioCompactionMultipleCycles();
 	runScenarioCompactionReplayIntegrity();
+	runScenarioBasicLoadingLegacyCoverage();
 }

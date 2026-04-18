@@ -19,3 +19,9 @@ Scenario P4: compact long mixed replay
     flow 10. mixed list operations -> LLEN(long:list) -> 5
     flow 11. mixed key rebuild -> TYPE(long:s1, long:list, long:hash) -> String List Hash
     flow 12. mixed hash mutations -> HEXISTS(long:hash, f0, f1, f3) -> 101
+
+Scenario P5: legacy basic WAL loading coverage (merged from WALChecks.cpp)
+    flow 21. overwrite + invalid command tolerance -> GET(persistedKey) -> persistedValue
+    flow 22. repeated DEL + RPUSH compaction-style logs -> LRANGE(compactedList, 0, 3) -> z a b c
+    flow 23. malformed quoted command should not block later commands -> GET(afterMalformed) -> stillWorks
+    flow 24. deterministic rebuild across list/hash -> HEXISTS(rebuildHash, f1, f2) -> 01
