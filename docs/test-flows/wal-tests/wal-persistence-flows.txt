@@ -1,4 +1,4 @@
-WAL persistence test flows (reduced set)
+WAL persistence test flows
 
 Scenario P1: mixed replay core (String + List + Hash)
     flow 1. SET(user:1, Alice) -> SET(user:1, Alicia) -> GET(user:1) -> Alicia

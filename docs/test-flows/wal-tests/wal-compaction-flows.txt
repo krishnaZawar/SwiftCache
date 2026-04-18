@@ -1,4 +1,4 @@
-WAL compaction test flows (reduced set)
+WAL compaction test flows
 
 Scenario C1: active compaction snapshot correctness
     flow 13. live WAL + heartbeat operations -> observe one compaction cycle completion
