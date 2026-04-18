@@ -113,14 +113,15 @@ class WAL {
             try {
 #if OS_WINDOWS
                 std::filesystem::rename(compactionDumpFile, dumpFile);
-                std::filesystem::remove(compactionDumpFile);
 #else
                 std::rename(compactionDumpFile.c_str(), dumpFile.c_str());
-                std::remove(compactionDumpFile.c_str());
 #endif
-            } catch(...) {
+            } catch(...) {}
+            #if OS_WINDOWS
+                std::filesystem::remove(compactionDumpFile);
+            #else
                 std::remove(compactionDumpFile.c_str());
-            }
+            #endif
         }
         void RunCompactionThread() {
             while(isRunning) {
