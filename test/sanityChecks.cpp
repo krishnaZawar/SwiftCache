@@ -511,3 +511,4 @@ void sanityCheck_genericFlows() {
     command = "GET k";
     AssertEqual("flow 38", executeCommand(parser, command), ERR_TYPE_MISMATCH + "\nError fetching k");
 }
+

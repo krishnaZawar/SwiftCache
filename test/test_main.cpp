@@ -6,7 +6,7 @@
 
 #include "syntaxChecks.cpp"
 #include "sanityChecks.cpp"
-#include "WALChecks.cpp"
+#include "test_wal.cpp"
 
 int main() {
 #ifdef _WIN32
