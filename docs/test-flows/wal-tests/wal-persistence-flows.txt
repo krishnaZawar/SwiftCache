@@ -1,26 +1,31 @@
 WAL persistence test flows
 
 Scenario P1: mixed replay core (String + List + Hash)
+    code: Scenario P1 -> scenarioP1_mixedReplayCore()
     flow 1. SET(user:1, Alice) -> SET(user:1, Alicia) -> GET(user:1) -> Alicia
     flow 2. RPUSH(queue, jobs-1, jobs-2) -> LPUSH(queue, jobs-0) -> LRANGE(queue, 0, 2) -> jobs-0 jobs-1 jobs-2
-    flow 3. HSET(profile, city, delhi, role, engineer) -> HGET(profile, city, role) -> delhi engineer
+        flow 3. HSET(profile, city, delhi, role, engineer) -> HGET(profile, city, role) -> delhi engineer
 
 Scenario P2: TTL and PERSIST replay behavior
+    code: Scenario P2 -> scenarioP2_ttlAndPersistReplay()
     flow 4. SET(session, token123) -> EXPIRE(session, 1) -> immediate GET(session) -> token123
     flow 5. SET(session, token123) -> EXPIRE(session, 1) -> wait 2s -> GET(session) -> key not found
     flow 6. SET(account, premium) -> EXPIRE(account, 1) -> PERSIST(account) -> wait 2s -> GET(account) -> premium
 
 Scenario P3: multi-restart WAL growth
+    code: Scenario P3 -> scenarioP3_multiRestartWalGrowth()
     flow 7. staged append/replay -> GET(cart:status) -> checked_out
     flow 8. staged append/replay -> LRANGE(cart:items, 0, 1) -> final1 final2
     flow 9. staged append/replay -> HGET(cart:meta, owner, state) -> user2 ready
 
 Scenario P4: compact long mixed replay
+    code: Scenario P4 -> scenarioP4_compactLongMixedReplay()
     flow 10. mixed list operations -> LLEN(long:list) -> 5
     flow 11. mixed key rebuild -> TYPE(long:s1, long:list, long:hash) -> String List Hash
     flow 12. mixed hash mutations -> HEXISTS(long:hash, f0, f1, f3) -> 101
 
 Scenario P5: legacy basic WAL loading coverage (merged from WALChecks.cpp)
+    code: Scenario P5 -> scenarioP5_legacyBasicWalLoadingCoverage()
     flow 21. overwrite + invalid command tolerance -> GET(persistedKey) -> persistedValue
     flow 22. repeated DEL + RPUSH compaction-style logs -> LRANGE(compactedList, 0, 3) -> z a b c
     flow 23. malformed quoted command should not block later commands -> GET(afterMalformed) -> stillWorks

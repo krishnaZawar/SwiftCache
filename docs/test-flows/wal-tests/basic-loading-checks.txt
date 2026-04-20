@@ -1,5 +1,7 @@
 Basic WAL loading correctness checks
 
+    code: Scenario P5 -> scenarioP5_legacyBasicWalLoadingCoverage()
+
     Scenario 1: mixed replay with invalid command and overwrite semantics.
     Scenario 2: repeated list snapshots remain stable with DEL + RPUSH contract.
     Scenario 3: malformed command does not block subsequent valid replay with quoted values.

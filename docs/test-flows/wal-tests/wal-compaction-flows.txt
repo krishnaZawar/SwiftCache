@@ -1,19 +1,23 @@
 WAL compaction test flows
 
 Scenario C1: active compaction snapshot correctness
+    code: Scenario C1 -> scenarioC1_compactionCycleCheck()
     flow 13. live WAL + heartbeat operations -> observe one compaction cycle completion
     flow 14. compacted WAL shape check -> contains latest compact:s and excludes deleted compact:tmp
     flow 15. replay compacted WAL -> GET(compact:s) -> final
 
 Scenario C2: temp compaction file cleanup
+    code: Scenario C2 -> scenarioC2_tempCompactionFileCleanup()
     flow 16. live WAL + heartbeat operations -> observe one compaction cycle completion
     flow 17. after WAL shutdown -> temp compact file (<dump>_compact.txt) should not exist
 
 Scenario C3: multi-cycle compaction convergence
+    code: Scenario C3 -> scenarioC3_multiCycleCompactionConvergence()
     flow 18. execute pre-mutation and post-mutation phases -> two compaction cycles observed
     flow 19. final compacted WAL includes latest value (v2) and excludes stale value (v1)
 
 Scenario C4: replay integrity after compaction
+    code: Scenario C4 -> scenarioC4_replayIntegrityAfterCompaction()
     flow 20. replay compacted WAL -> TYPE(ri:s, ri:l, ri:h) -> String List Hash
 
 Notes:

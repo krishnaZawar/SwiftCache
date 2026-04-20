@@ -84,7 +84,8 @@ namespace {
 		return false;
 	}
 
-	void runScenarioPersistenceMixedReplay() {
+	// Scenario P1
+	void scenarioP1_mixedReplayCore() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_1.txt";
@@ -114,7 +115,8 @@ namespace {
 		std::remove(walFile.c_str());
 	}
 
-	void runScenarioPersistenceTTLAndPersist() {
+	// Scenario P2
+	void scenarioP2_ttlAndPersistReplay() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_2.txt";
@@ -143,7 +145,8 @@ namespace {
 		std::remove(walFile.c_str());
 	}
 
-	void runScenarioPersistenceMultiRestart() {
+	// Scenario P3
+	void scenarioP3_multiRestartWalGrowth() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_3.txt";
@@ -181,7 +184,8 @@ namespace {
 		std::remove(walFile.c_str());
 	}
 
-	void runScenarioPersistenceLongMixed() {
+	// Scenario P4
+	void scenarioP4_compactLongMixedReplay() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_4.txt";
@@ -217,7 +221,8 @@ namespace {
 		std::remove(walFile.c_str());
 	}
 
-	void runScenarioCompactionActiveSnapshot() {
+	// Scenario C1
+	void scenarioC1_compactionCycleCheck() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_12.txt";
@@ -269,7 +274,8 @@ namespace {
 		std::remove(compactionWalFile.c_str());
 	}
 
-	void runScenarioCompactionTempFileCleanup() {
+	// Scenario C2
+	void scenarioC2_tempCompactionFileCleanup() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_13.txt";
@@ -303,7 +309,8 @@ namespace {
 		std::remove(compactionWalFile.c_str());
 	}
 
-	void runScenarioCompactionMultipleCycles() {
+	// Scenario C3
+	void scenarioC3_multiCycleCompactionConvergence() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_14.txt";
@@ -349,7 +356,8 @@ namespace {
 		std::remove(compactionWalFile.c_str());
 	}
 
-	void runScenarioCompactionReplayIntegrity() {
+	// Scenario C4
+	void scenarioC4_replayIntegrityAfterCompaction() {
 		string command;
 
 		const string walFile = "test/wal_persistence_test_dump_15.txt";
@@ -394,7 +402,8 @@ namespace {
 		std::remove(compactionWalFile.c_str());
 	}
 
-	void runScenarioBasicLoadingLegacyCoverage() {
+	// Scenario P5
+	void scenarioP5_legacyBasicWalLoadingCoverage() {
 		string command;
 
 		const string walFile1 = "test/wal_persistence_test_dump_16.txt";
@@ -479,13 +488,13 @@ namespace {
 
 void sanityCheck_walPersistence() {
 	printHeading("Sanity Checks for WAL persistence");
-	runScenarioPersistenceMixedReplay();
-	runScenarioPersistenceTTLAndPersist();
-	runScenarioPersistenceMultiRestart();
-	runScenarioPersistenceLongMixed();
-	runScenarioCompactionActiveSnapshot();
-	runScenarioCompactionTempFileCleanup();
-	runScenarioCompactionMultipleCycles();
-	runScenarioCompactionReplayIntegrity();
-	runScenarioBasicLoadingLegacyCoverage();
+	scenarioP1_mixedReplayCore();
+	scenarioP2_ttlAndPersistReplay();
+	scenarioP3_multiRestartWalGrowth();
+	scenarioP4_compactLongMixedReplay();
+	scenarioC1_compactionCycleCheck();
+	scenarioC2_tempCompactionFileCleanup();
+	scenarioC3_multiCycleCompactionConvergence();
+	scenarioC4_replayIntegrityAfterCompaction();
+	scenarioP5_legacyBasicWalLoadingCoverage();
 }
