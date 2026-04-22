@@ -1,0 +1,53 @@
+OOM issue:
+    OOM(out of memory) is an issue that occurs when the DB is overloaded with data and any new addition of data will cause the DB to crash.
+    This can be due to the DB memory or the WAL memory, if the combination of both grows beyond the allocated process memory.
+
+What should be done?
+    This is an important issue to address as the DB should never go down because of bad memory usage and we should limit the user on how the memory should be used.
+
+Plan of Action:
+    We can never control what is put into the DB and in the logs, but we can always control how much can be put. We can impose hard limits on the memory allocation for individual tasks in order to not grow outbound and crash.
+    
+    A good split up of the allocated process memory can be:
+        85 % allocation to DB 
+        10 % allocation to WAL logs
+        5 % buffer for processing, accounting for memory estimation errors, and overheads
+    
+The main question that arises is how do we keep track of all these?
+    We will just keep track of the 85% and 10%, the 5% is something that will almost never be exceeded.
+    To keep track we just dont rely on what the CPU tells us, we build our own memory allocation tracker for this to estimate the usage and limit updates accordingly.
+    
+How would the system work after this?
+    The main issue will only arise from the 85% because we have no control of releasing memory here.
+    Here we can do 2 things to handle this:
+        1. Throw an error when any updates or additions will grow outbound
+        2. Use an eviction algorithm like PLRU to evict a key and make space for the new data
+    We will initially plan going with the first approach and then facilitate the second one as well.
+
+    Now looking at the other 10%, there qill almost never be an issue here. We can dump the buffered logs once the logs reach a usage of 6%-8%. Plus the logs will still be dumped when the timer goes off. So this will almost never exceed 9%-10% usage.
+
+    The other 5% is never exceeded, this is a buffer used for processing and accounting for estimation errors.
+
+The memory allocation tracker:
+    We will have a fixed hard limit for every portion mentioned above (except for the 5%).
+    Every deletion, insertion or update will go through the tracker and update the memory usage.
+
+    The memory can be tracked based on 2 things:
+        1. length of the string
+            But it has issues, this can miss out on actual allocation done because sometimes the memory occupied is much more than the size.
+            Can lead to OOM issues more often
+        2. capacity of the string
+    
+    Also overheads can be different for different types, Hence the tracking should be done type specific.
+
+    This will be the same for the logs as well.
+
+Important change to notice:
+    Currently  the logs, both compaction and main, are buffered for the period before dumping them for persistence. The issue of memory tracking and OOM increases when the DB, main logs and compaction logs all stay in the buffer as tracking can take a toll and result in a crash.
+    Here to avoid this scenario, one thing we can do is, only buffer the main logs and dump the compaction logs directly to the file. This will release the pressure from the process and avoid this issue.
+
+Note:
+    The allocation portions mentioned above are to be used most likely, but may change based on performance tuning and requirements.
+
+Future Scope:
+    Instead of imposing hard limits on each section like 85% and 10%, we can bump up the limit for the whole DB to 95%. This will reduce unnecessary backpressure when the memory is not utilized to potential plus give us room to dynamically scale the DB and Logs as need arises with some soft limits to increase checks during that period.
