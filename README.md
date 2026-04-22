@@ -75,7 +75,6 @@ A key can only hold one type of data at a time. To change the datatype, the key 
 ### Persistence
 The **Write-Ahead Log (WAL)** is used to persist the database state. It enables recovery after crashes and prevents data loss during restarts. By default, persistence is disabled for performance reasons, but it can be enabled by providing a `dumpFile` and `dumpInterval` when starting the server.
 ## Future scope of development
-1. Add WAL compaction algorithm to keep it from growing boundless.
-2. IO multiplexing to serve multiple clients
-3. Write a driver to make the DB more integrable and easy to use
-4. Eviction mechanism (LRU, LFU, PLRU depending on performance)
+1. IO multiplexing to serve multiple clients
+2. Write a driver to make the DB more integrable and easy to use
+3. Eviction mechanism (LRU, LFU, PLRU depending on performance)
