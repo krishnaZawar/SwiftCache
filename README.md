@@ -9,6 +9,10 @@ g++ src/main.cpp -o db -lws2_32
 2. Start the DB server using
 ```
 ./db -df <.txt file> -di <interval in seconds>	# for persistence
+
+# ci by default 5 * di if not given (has effect only when persistence is enabled)
+./db -ci <interval in seconds>                  # configurable compaction interval  
+
 ./db -p <port number>							# to run on specific port
 ./db											# to run on default 8080
 ```
