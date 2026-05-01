@@ -29,7 +29,7 @@ class Database{
         vector<vector<Object*>> primaryDb;
         vector<vector<Object*>> rehashDb;
         
-        private:
+    private:
         int primaryDbIdxForExpiry;
         
         float keysPresent;
@@ -115,8 +115,7 @@ class Database{
                                 rehashDb[newHash].push_back(primaryDb[rehashIdx][i]);
                             }
                             else{
-                                delete primaryDb[rehashIdx][i];
-                                keysPresent--;
+                                expireKey(primaryDb, rehashIdx, i);
                             }
                         }
                     }
@@ -127,7 +126,17 @@ class Database{
             }
             primaryDbIdxForRehash = rehashIdx;
         }
-
+    
+    private:
+        void expireKey(vector<vector<Object*>> &db, int row, int idx) {
+            if(walActive) {
+                wal->appendLog("DEL "+db[row][idx]->getKey());
+            }
+            delete db[row][idx];
+            db[row][idx] = db[row].back();
+            db[row].pop_back();
+            keysPresent--;
+        }
     public:
         // Clears the expired keys to free memory for new keys. This does incremental batch checks to perform expiration.
         void runExpiryLoop(){
@@ -147,11 +156,7 @@ class Database{
                         primaryDb[expireIdx].pop_back();
                     }
                     else if(primaryDb[expireIdx][i]->expired()){
-                        delete primaryDb[expireIdx][i];
-                        primaryDb[expireIdx][i] = primaryDb[expireIdx].back();
-                        primaryDb[expireIdx].pop_back();
-
-                        keysPresent--;
+                        expireKey(primaryDb, expireIdx, i);
                     }
                 }
                 curBatchSize++;
@@ -172,22 +177,32 @@ class Database{
             }
             int batchesLeft = compactionBatchSize;
             vector<string> commands;
+            int counter = 0;
             while(batchesLeft && (compactionRowPrimary < primaryDb.size() || compactionRowRehash < rehashDb.size())) {
+                counter = 0;
                 if(compactionRowPrimary < primaryDb.size()) {
                     for(auto &obj : primaryDb[compactionRowPrimary]) {
+                        if (obj->expired()) {
+                            expireKey(primaryDb, compactionRowPrimary, counter);
+                        }
                         commands = obj->buildCommands();
                         for(auto &command: commands) {
                             wal->appendCompactionLog(command);
                         }
                     }
+                    counter++;
                     compactionRowPrimary++;
                 } else {
                     for(auto &obj : rehashDb[compactionRowRehash]) {
+                        if (obj->expired()) {
+                            expireKey(rehashDb, compactionRowRehash, counter);
+                        }
                         commands = obj->buildCommands();
                         for(auto &command: commands) {
                             wal->appendCompactionLog(command);
                         }
                     }
+                    counter++;
                     compactionRowRehash++;
                 }
                 batchesLeft--;
@@ -204,11 +219,7 @@ class Database{
                 }
                 else if(db[hash][i]->getKey() == key){
                     if(db[hash][i]->expired()){
-                        delete db[hash][i];
-                        primaryDb[hash][i] = primaryDb[hash].back();
-                        primaryDb[hash].pop_back();
-                        
-                        keysPresent--;
+                        expireKey(db, hash, i);
                         return false;
                     }
                     return true;
@@ -225,9 +236,7 @@ class Database{
                     primaryDb[hash].pop_back();
                 }
                 else if(db[hash][i]->getKey() == key){
-                    delete db[hash][i];
-                    primaryDb[hash][i] = primaryDb[hash].back();
-                    primaryDb[hash].pop_back();
+                    expireKey(db, hash, i);
                     return true;
                 }
             }
@@ -253,11 +262,7 @@ class Database{
                 }
                 else if(db[hash][i]->getKey() == key){
                     if(db[hash][i]->expired()){
-                        delete db[hash][i];
-                        primaryDb[hash][i] = primaryDb[hash].back();
-                        primaryDb[hash].pop_back();
-
-                        keysPresent--;
+                        expireKey(db, hash, i);
                         return NULL;
                     }
                     return db[hash][i];
@@ -308,8 +313,6 @@ class Database{
                 }
                 Rehash();
             }
-
-            keysPresent--;
 
             if(!underRehash){
                 checkForRehash();
