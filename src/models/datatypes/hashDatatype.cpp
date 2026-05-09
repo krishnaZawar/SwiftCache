@@ -2,6 +2,8 @@
 #include<unordered_map>
 #include<vector>
 
+#include "../../base/errors.h"
+
 #ifndef hashDatatype_class
 #define hashDatatype_class
 
